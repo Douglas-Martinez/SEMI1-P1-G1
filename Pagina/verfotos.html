@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Fotos</title>
+
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
+        crossorigin="anonymous"></script>
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+
+        .ekko-lightbox-nav-overlay a {
+            color: goldenrod;
+        }
+
+        .gallery-title {
+            text-align: center;
+            font-weight: 500;
+            border-bottom: 1px dotted orange;
+            margin-top: 1em;
+        }
+    </style>
+
+    <script>
+        $(document).on('click', '[data-toggle="lightbox"]', function (event) {
+            event.preventDefault();
+            $(this).ekkoLightbox({ alwaysShowClose: true });
+        });
+    </script>
+
+
+    <!-- Custom styles for this template -->
+    <link href="css/form-validation.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <div class="container">
+        <main>
+            <div class="py-5 text-center">
+                <h2>Ver Fotos</h2>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-3 col-lg-3 ">
+
+                    <form class="card p-2">
+                        <div class="col-12">
+                            <img src="resources/no-photo.jpg" alt="..." class="img-thumbnail">
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" type="button">Subir Foto</button>
+                            <button class="btn btn-primary" type="button">Editar Albumes</button>
+                            <button class="btn btn-primary" type="button">Regresar</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-9 col-lg-9">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-12">
+                                <h1 class="page-title">Projects</h1>
+                                <h3 class="gallery-title">Album 1</h3>
+                                <div class="row">
+                                    <a href="https://tarea2-201602754.s3.us-east-2.amazonaws.com/20201226_215702.jpg"
+                                        data-toggle="lightbox" data-gallery="example-gallery"
+                                        class="col-lg-3 col-md-4 col-6 my-3">
+                                        <img src="https://tarea2-201602754.s3.us-east-2.amazonaws.com/20201226_215702.jpg"
+                                            class="img-fluid card">
+                                    </a>
+                                    <a href="https://unsplash.it/1200/768.jpg?image=252" data-toggle="lightbox"
+                                        data-gallery="example-gallery" class="col-lg-3 col-md-4 col-6 my-3">
+                                        <img src="https://unsplash.it/600.jpg?image=252" class="img-fluid card">
+                                    </a>
+                                    <a href="https://unsplash.it/1200/768.jpg?image=253" data-toggle="lightbox"
+                                        data-gallery="example-gallery" class="col-lg-3 col-md-4 col-6 my-3">
+                                        <img src="https://unsplash.it/600.jpg?image=253" class="img-fluid card">
+                                    </a>
+                                    <a href="https://unsplash.it/1200/768.jpg?image=254" data-toggle="lightbox"
+                                        data-gallery="example-gallery" class="col-lg-3 col-md-4 col-6 my-3">
+                                        <img src="https://unsplash.it/600.jpg?image=254" class="img-fluid card">
+                                    </a>
+                                    <a href="https://unsplash.it/1200/768.jpg?image=255" data-toggle="lightbox"
+                                        data-gallery="example-gallery" class="col-lg-3 col-md-4 col-6 my-3">
+                                        <img src="https://unsplash.it/600.jpg?image=255" class="img-fluid card">
+                                    </a>
+                                    <a href="https://unsplash.it/1200/768.jpg?image=256" data-toggle="lightbox"
+                                        data-gallery="example-gallery" class="col-lg-3 col-md-4 col-6 my-3">
+                                        <img src="https://unsplash.it/600.jpg?image=256" class="img-fluid card">
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+        </main>
+
+        <footer class="my-5 pt-5 text-muted text-center text-small">
+            <p class="mb-1">&copy; 2021</p>
+
+        </footer>
+    </div>
+    <script src="js/form-validation.js"></script>
+</body>
+
+</html>
