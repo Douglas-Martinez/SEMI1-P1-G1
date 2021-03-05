@@ -41,6 +41,17 @@ app.use(
 );
 
 //Rutas - app.use('/', router);
+//RegistroGET para pruebas
+app.post('/', function (req, res) {
+    res.setHeader('Content-Type', 'application/json');
+    res.json({
+        estado: "mensaje",
+        mensaje: 'Error con datos de registro'
+    });
+
+    console.log(req.body);
+});
+
 //Registro
 app.post("/usuarios", async (req, res) => {
     let body = req.body;

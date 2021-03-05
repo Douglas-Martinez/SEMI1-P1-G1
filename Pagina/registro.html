@@ -50,8 +50,12 @@
 
           <form class="card p-2">
             <div class="col-12">
-              <img src="resources/no-photo.jpg" alt="..." class="img-thumbnail">
-              <button class="w-100 btn btn-primary btn-lg" type="submit">Subir Foto</button>
+
+              <div style="height:0px;overflow:hidden">
+                <input type="file" id="fileInput" name="fileInput" onchange='previewFile()' />
+              </div>
+              <img id='output' src="resources/no-photo.jpg" alt="..." class="img-thumbnail">
+              <button id="upload_widget" type="button" class="w-100 btn btn-primary btn-lg" onclick="chooseFile();">Subir Foto</button>
             </div>
           </form>
         </div>
@@ -61,29 +65,29 @@
             <div class="row g-3">
               <div class="col-12">
                 <label for="firstName" class="form-label">Usuario</label>
-                <input type="text" class="form-control" id="firstName" placeholder="" value="" required>
+                <input type="text" class="form-control" id="user1" placeholder="" value="" required>
               </div>
 
               <div class="col-12">
                 <label for="firstName" class="form-label">Nombre Completo</label>
-                <input type="text" class="form-control" id="firstName" placeholder="" value="" required>
+                <input type="text" class="form-control" id="name1" placeholder="" value="" required>
               </div>
 
               <div class="col-12">
                 <label for="firstName" class="form-label">Clave</label>
-                <input type="text" class="form-control" id="firstName" placeholder="" value="" required>
+                <input type="text" class="form-control" id="pass1" placeholder="" value="" required>
               </div>
 
               <div class="col-12">
                 <label for="firstName" class="form-label">Confirmar Clave</label>
-                <input type="text" class="form-control" id="firstName" placeholder="" value="" required>
+                <input type="text" class="form-control" id="pass2" placeholder="" value="" required>
               </div>
 
             </div>
 
             <hr class="my-4">
 
-            <button class="w-100 btn btn-primary btn-lg" type="submit">Registrarte</button>
+            <button type="button" class="w-100 btn btn-primary btn-lg" onclick="RegistroButton();">Registrarte</button>
           </form>
         </div>
       </div>
@@ -96,5 +100,66 @@
   </div>
   <script src="js/form-validation.js"></script>
 </body>
-
 </html>
+
+<script>
+  var imagenName = "";
+  var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+  var theUrl = "http://localhost:3000/";
+
+  function chooseFile() {
+    document.getElementById("fileInput").click();
+  }  
+
+  //Metodo para obtener la imagen
+  function previewFile() {
+    var preview = document.querySelector('img');
+    var file    = document.querySelector('input[type=file]').files[0];
+    var reader  = new FileReader();
+
+    reader.onloadend = function () {
+      preview.src = reader.result;
+      imagenName = reader.result;
+    }
+
+    if (file) {
+      reader.readAsDataURL(file);
+    } else {
+      preview.src = "";
+    }
+  }
+
+  function RegistroButton() {
+    var user = document.getElementById("user1").value; 
+    var name = document.getElementById("name1").value; 
+    var pass = document.getElementById("pass1").value; 
+    var veri = document.getElementById("pass2").value; 
+    var fperfil = "default"; 
+    
+    if(pass == veri){
+      
+      if(imagenName != "")fperfil = user + 1;
+
+      var text = '{ "username":"'+ user +'" , '+
+                  '"nombre":"'+ name +'" , '+
+                  '"password":"'+ pass +'" , '+
+                  '"fperfil":"'+ fperfil +'" }';    
+      
+      var obj = JSON.parse(text); 
+      console.log(obj);
+
+      xmlhttp.open("POST", theUrl);
+      xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      xmlhttp.onload  = function() {
+        var jsonResponse = JSON.parse(xmlhttp.responseText);
+        // do something with jsonResponse
+        console.log(jsonResponse)
+      };
+      xmlhttp.send(JSON.stringify({ "username": user, "nombre": name, "password" : pass, "fperfil" : fperfil }));
+
+    } else {
+      console.log("No coinciden las claves");
+    }
+  }
+
+</script>
