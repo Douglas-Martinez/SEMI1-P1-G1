@@ -3,7 +3,7 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const uuid = require('uuid');
+var uuid = require('uuid');
 const md5 = require('md5');
 
 //MYSQL
@@ -365,9 +365,15 @@ app.post("/fotos/:id?", async (req, res) => {
     let id = parseInt(req.params.id, 10);
     let body = req.body;
 
-    //Ingresar imgen al bucket
+    let nombreimagen = body.nombre;    
+    if(body.imagen != ""){
+        const aux = body.imagen;
+        const tipo = aux.split(';')[0].split('/')[1];
 
-    let sql = `INSERT INTO foto (nombre_foto, id_album) VALUES ('${body.nombre}', '${id}');`;
+        nombreimagen = nombreimagen + '_' + uuid.v4() + '.' + tipo;
+    }
+
+    let sql = `INSERT INTO foto (nombre_foto, id_album) VALUES ('${nombreimagen}', '${id}');`;
 
     conn.query(sql, (err, result) => {
         if(err) {
@@ -388,7 +394,7 @@ app.post("/fotos/:id?", async (req, res) => {
 
             const params = {
                 Bucket: 'practica1-g1-imagenes',
-                Key: `Fotos_Publicadas/${userId}.${type}`, // type is not required
+                Key: `Fotos_Publicadas/${nombreimagen}`, // type is not required
                 Body: base64Data,
                 ACL: 'public-read',
                 ContentEncoding: 'base64', // required
