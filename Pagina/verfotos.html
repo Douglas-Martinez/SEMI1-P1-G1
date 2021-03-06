@@ -40,14 +40,6 @@
         }
     </style>
 
-    <script>
-        $(document).on('click', '[data-toggle="lightbox"]', function (event) {
-            event.preventDefault();
-            $(this).ekkoLightbox({ alwaysShowClose: true });
-        });
-    </script>
-
-
     <!-- Custom styles for this template -->
     <link href="css/form-validation.css" rel="stylesheet">
 </head>
@@ -80,37 +72,8 @@
                 <div class="col-md-9 col-lg-9">
                     <div class="container">
                         <div class="row">
-                            <div class="col-12">
-                                <h1 class="page-title">Projects</h1>
-                                <h3 class="gallery-title">Album 1</h3>
-                                <div class="row">
-                                    <a href="https://tarea2-201602754.s3.us-east-2.amazonaws.com/20201226_215702.jpg"
-                                        data-toggle="lightbox" data-gallery="example-gallery"
-                                        class="col-lg-3 col-md-4 col-6 my-3">
-                                        <img src="https://tarea2-201602754.s3.us-east-2.amazonaws.com/20201226_215702.jpg"
-                                            class="img-fluid card">
-                                    </a>
-                                    <a href="https://tarea2-201602754.s3.us-east-2.amazonaws.com/perfil/20201226_215335.jpg" data-toggle="lightbox"
-                                        data-gallery="example-gallery" class="col-lg-3 col-md-4 col-6 my-3">
-                                        <img src="https://tarea2-201602754.s3.us-east-2.amazonaws.com/perfil/20201226_215335.jpg" class="img-fluid card">
-                                    </a>
-                                    <a href="https://unsplash.it/1200/768.jpg?image=253" data-toggle="lightbox"
-                                        data-gallery="example-gallery" class="col-lg-3 col-md-4 col-6 my-3">
-                                        <img src="https://unsplash.it/600.jpg?image=253" class="img-fluid card">
-                                    </a>
-                                    <a href="https://unsplash.it/1200/768.jpg?image=254" data-toggle="lightbox"
-                                        data-gallery="example-gallery" class="col-lg-3 col-md-4 col-6 my-3">
-                                        <img src="https://unsplash.it/600.jpg?image=254" class="img-fluid card">
-                                    </a>
-                                    <a href="https://unsplash.it/1200/768.jpg?image=255" data-toggle="lightbox"
-                                        data-gallery="example-gallery" class="col-lg-3 col-md-4 col-6 my-3">
-                                        <img src="https://unsplash.it/600.jpg?image=255" class="img-fluid card">
-                                    </a>
-                                    <a href="https://unsplash.it/1200/768.jpg?image=256" data-toggle="lightbox"
-                                        data-gallery="example-gallery" class="col-lg-3 col-md-4 col-6 my-3">
-                                        <img src="https://unsplash.it/600.jpg?image=256" class="img-fluid card">
-                                    </a>
-                                </div>
+                            <div id = "albumes" class="col-12">
+                                <h1 class="page-title">Albumes</h1>
                             </div>
                         </div>
                     </div>
@@ -127,3 +90,79 @@
 </body>
 
 </html>
+
+<script>
+    var url_string = window.location.href; //window.location.href
+    var url = new URL(url_string);
+    var idUser = url.searchParams.get("id");
+    var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+    var theUrl = "http://localhost:3000/fotos/" + idUser;
+
+    xmlhttp.open("GET", theUrl);
+    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlhttp.onload  = function() {
+    var jsonResponse = JSON.parse(xmlhttp.responseText);
+    // do something with jsonResponse
+    if(jsonResponse.estado == "OK"){
+        
+        console.log(jsonResponse.content);
+
+        var result = jsonResponse.content.reduce(function (r, a) {
+                r[a.nombre_album] = r[a.nombre_album] || [];
+                r[a.nombre_album].push(a);
+                return r;
+            }, Object.create(null));
+
+        for (let index = 0; index < result.length; index++) {
+            const element = result[index];
+            
+        }
+
+        Object.keys(result).forEach(function(key) {
+            var value = result[key];
+
+            var select = document.getElementById("albumes");
+            var h3=document.createElement("h3");
+            h3.className = "gallery-title";
+            h3.textContent = key;
+
+            select.appendChild(h3);
+
+            var div=document.createElement("div");
+            div.className = "row";
+
+            for (let index = 0; index < value.length; index++) {
+                const element = value[index];
+                var a = document.createElement("a");
+                a.className = "col-lg-3 col-md-4 col-6 my-3";
+                a.setAttribute('href', "https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Publicadas/" + element.nombre_foto);
+                a.setAttribute('data-toggle', "lightbox");
+                a.setAttribute('data-gallery', "example-gallery");
+
+                var img = document.createElement("img");
+                img.className = "img-fluid card";
+                img.setAttribute('src', "https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Publicadas/" + element.nombre_foto);
+
+                a.appendChild(img);
+                div.appendChild(a);
+                
+                console.log(element.nombre_foto);
+            }
+            
+            select.appendChild(div);
+        });
+
+
+        //document.getElementById("user1").value = jsonResponse.content[0].username; 
+        //document.getElementById("name1").value = jsonResponse.content[0].nombre; 
+        
+        //document.location = 'inicio.html'; //CREAR OTRO XML AQUI?
+    } else {
+        console.log("No existe el usuario");
+    }
+    };
+    xmlhttp.send();
+
+    console.log(idUser);
+
+</script>

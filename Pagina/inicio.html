@@ -74,7 +74,7 @@
         <div class="col-md-4 col-lg-5">
           <div class="d-grid gap-2">
             <button class="btn btn-primary" type="button" onclick="SubirFotoButton();">Subir Foto</button>
-            <button class="btn btn-primary" type="button">Ver Fotos</button>
+            <button class="btn btn-primary" type="button" onclick="VerFotosButton();">Ver Fotos</button>
             <button class="btn btn-primary" type="button">Editar Perfil</button>
             <button class="btn btn-primary" type="button" onclick="EditarAlbumButton();">Editar Albumes</button>
             <button class="btn btn-primary" type="button" onclick="CerrarButton();">Cerrar Sesion</button>
@@ -120,6 +120,10 @@ xmlhttp.onload  = function() {
 xmlhttp.send();
 
 console.log(idUser);
+
+function VerFotosButton(){
+  document.location='verfotos.html?id='+ idUser;
+}
 
 function SubirFotoButton(){
   document.location='subirfoto.html?id='+ idUser;
