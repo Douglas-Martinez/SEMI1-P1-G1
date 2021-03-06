@@ -37,16 +37,16 @@
 <body class="text-center">
 
   <main class="form-signin">
-    <form>
+    <form >
       <img class="mb-4" src="resources/camera.png" alt="" width="72" height="72">
       <h1 class="h3 mb-3 fw-normal">Inicio de Sesion</h1>
-      <label for="user1" class="visually-hidden">Correo</label>
-      <input type="email" id="user1" class="form-control" placeholder="Correo" autofocus>
-      <label for="pass1" class="visually-hidden">Clave</label>
+      <label for="firstName" class="visually-hidden">Correo</label>
+      <input type="text" id="user1" class="form-control" placeholder="Correo">
+      <label for="firstName" class="visually-hidden">Clave</label>
       <input type="password" id="pass1" class="form-control" placeholder="Clave">
-      <button class="w-100 btn btn-lg btn-primary" type="submit" onclick="LoginButton();">Iniciar Sesion</button>
+      <button type="button" class="w-100 btn btn-lg btn-primary" onclick="LoginButton();">Iniciar Sesion</button>
       <hr />
-      <button class="w-100 btn btn-lg btn-primary" type="submit" onclick="RegistroButton();">Registrarse</button>
+      <button type="button" class="w-100 btn btn-lg btn-primary" onclick="RegistroButton();">Registrarse</button>
       <p class="mt-5 mb-3 text-muted">&copy; 2021</p>
     </form>
   </main>
@@ -81,7 +81,6 @@
           
           document.location='inicio.html?id='+jsonResponse.content[0].id_usuario;
           
-          //document.location = 'inicio.html'; //CREAR OTRO XML AQUI?
         } else {
           console.log("Credenciales Equivocados");
         }
