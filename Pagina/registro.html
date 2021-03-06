@@ -140,14 +140,6 @@
       
       if(imagenName != "")fperfil = user + 1;
 
-      var text = '{ "username":"'+ user +'" , '+
-                  '"nombre":"'+ name +'" , '+
-                  '"password":"'+ pass +'" , '+
-                  '"fperfil":"'+ fperfil +'" }';    
-      
-      var obj = JSON.parse(text); 
-      console.log(obj);
-
       xmlhttp.open("POST", theUrl);
       xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
       xmlhttp.onload  = function() {

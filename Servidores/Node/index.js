@@ -355,6 +355,27 @@ app.post("/fotos/:id?", async (req, res) => {
             });
         } else {
             console.log(result);
+
+            var base64 = body.imagen;
+            const base64Data = new Buffer.from(base64.replace(/^data:image\/\w+;base64,/, ""), 'base64');
+            const type = base64.split(';')[0].split('/')[1];
+            const userId = body.nombre;
+
+            const params = {
+                Bucket: 'practica1-g1-imagenes',
+                Key: `Fotos_Publicadas/${userId}.${type}`, // type is not required
+                Body: base64Data,
+                ACL: 'public-read',
+                ContentEncoding: 'base64', // required
+                ContentType: `image/${type}` // required. Notice the back ticks
+            }
+            
+            s3.upload(params, function(err, data) {
+                if (err) {
+                    throw err
+                }
+                console.log(`File uploaded successfully. ${data.Location}`)
+            });
     
             res.json({
                 estado: "OK",
