@@ -71,7 +71,7 @@ app.post("/usuarios", async (req, res) => {
         } else {
             console.log(result);
 
-            if(body.image != ""){
+            if(body.imagen != ""){
                 var base64 = body.imagen;
                 const base64Data = new Buffer.from(base64.replace(/^data:image\/\w+;base64,/, ""), 'base64');
                 const type = base64.split(';')[0].split('/')[1];
