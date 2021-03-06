@@ -154,8 +154,9 @@
         var jsonResponse = JSON.parse(xmlhttp.responseText);
         // do something with jsonResponse
         console.log(jsonResponse)
+
       };
-      xmlhttp.send(JSON.stringify({ "username": user, "nombre": name, "password" : pass, "fperfil" : fperfil }));
+      xmlhttp.send(JSON.stringify({ "username": user, "nombre": name, "password" : pass, "fperfil" : fperfil, "imagen": imagenName}));
 
     } else {
       console.log("No coinciden las claves");

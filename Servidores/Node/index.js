@@ -55,7 +55,6 @@ app.post('/', function (req, res) {
 //Registro
 app.post("/usuarios", async (req, res) => {
     let body = req.body;
-
     //Ingresar imagen al bucket
 
     let sql = `INSERT INTO usuario (username, nombre, password, im_perfil) VALUES ('${body.username}', '${body.nombre}', '${body.password}', '${body.fperfil}');`;
@@ -71,6 +70,29 @@ app.post("/usuarios", async (req, res) => {
             });
         } else {
             console.log(result);
+
+            if(body.image != ""){
+                var base64 = body.imagen;
+                const base64Data = new Buffer.from(base64.replace(/^data:image\/\w+;base64,/, ""), 'base64');
+                const type = base64.split(';')[0].split('/')[1];
+                const userId = body.fperfil;
+
+                const params = {
+                    Bucket: 'practica1-g1-imagenes',
+                    Key: `Fotos_Perfil/${userId}.${type}`, // type is not required
+                    Body: base64Data,
+                    ACL: 'public-read',
+                    ContentEncoding: 'base64', // required
+                    ContentType: `image/${type}` // required. Notice the back ticks
+                }
+                
+                s3.upload(params, function(err, data) {
+                    if (err) {
+                        throw err
+                    }
+                    console.log(`File uploaded successfully. ${data.Location}`)
+                });
+            }
     
             res.json({
                 estado: "OK",
@@ -86,7 +108,6 @@ app.post("/usuarios/login", async (req, res) => {
     let body = req.body;
     let sqlGet = `SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE username = '${body.username}' AND password = '${body.password}';`;
 
-    console.log(sqlGet)
 
     conn.query(sqlGet, (err, result) => {
         if(err) {
