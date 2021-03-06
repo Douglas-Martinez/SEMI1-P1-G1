@@ -40,19 +40,54 @@
     <form>
       <img class="mb-4" src="resources/camera.png" alt="" width="72" height="72">
       <h1 class="h3 mb-3 fw-normal">Inicio de Sesion</h1>
-      <label for="inputEmail" class="visually-hidden">Correo</label>
-      <input type="email" id="inputEmail" class="form-control" placeholder="Correo" required autofocus>
-      <label for="inputPassword" class="visually-hidden">Clave</label>
-      <input type="password" id="inputPassword" class="form-control" placeholder="Clave" required>
-      <button class="w-100 btn btn-lg btn-primary" type="submit">Iniciar Sesion</button>
+      <label for="user1" class="visually-hidden">Correo</label>
+      <input type="email" id="user1" class="form-control" placeholder="Correo" required autofocus>
+      <label for="pass1" class="visually-hidden">Clave</label>
+      <input type="password" id="pass1" class="form-control" placeholder="Clave" required>
+      <button class="w-100 btn btn-lg btn-primary" type="submit" onclick="LoginButton();">Iniciar Sesion</button>
       <hr />
-      <button class="w-100 btn btn-lg btn-primary" type="submit">Registrarse</button>
+      <button class="w-100 btn btn-lg btn-primary" type="submit" onclick="RegistroButton();">Registrarse</button>
       <p class="mt-5 mb-3 text-muted">&copy; 2021</p>
     </form>
   </main>
-
-
-
 </body>
 
 </html>
+
+<script>
+  var imagenName = "";
+  var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+  var theUrl = "http://localhost:3000/usuarios/login";
+
+  function LoginButton() {
+    var user = document.getElementById("user1").value; 
+    var pass = document.getElementById("pass1").value;
+    
+      var text = '{ "username":"'+ user +'" , '+
+                  '"password":"'+ pass +'" }';    
+      
+      var obj = JSON.parse(text); 
+      console.log(obj);
+
+      xmlhttp.open("POST", theUrl);
+      xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      xmlhttp.onload  = function() {
+        var jsonResponse = JSON.parse(xmlhttp.responseText);
+        // do something with jsonResponse
+        if(jsonResponse.estado == "OK"){
+          
+          document.location='inicio.html?id='+jsonResponse.content[0].id_usuario;
+          
+          //document.location = 'inicio.html'; //CREAR OTRO XML AQUI?
+        } else {
+          console.log("Credenciales Equivocados");
+        }
+      };
+      xmlhttp.send(JSON.stringify({ "username": user, "password" : pass }));
+  }
+
+  function RegistroButton(){
+    document.location = 'registro.html';
+  }
+
+</script>

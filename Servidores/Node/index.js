@@ -82,9 +82,11 @@ app.post("/usuarios", async (req, res) => {
     });
 });
 //Loggin y Perfil
-app.get("/usuarios/login", async (req, res) => {
+app.post("/usuarios/login", async (req, res) => {
     let body = req.body;
     let sqlGet = `SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE username = '${body.username}' AND password = '${body.password}';`;
+
+    console.log(sqlGet)
 
     conn.query(sqlGet, (err, result) => {
         if(err) {
