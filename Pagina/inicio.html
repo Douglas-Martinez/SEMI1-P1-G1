@@ -76,7 +76,7 @@
             <button class="btn btn-primary" type="button">Subir Foto</button>
             <button class="btn btn-primary" type="button">Ver Fotos</button>
             <button class="btn btn-primary" type="button">Editar Perfil</button>
-            <button class="btn btn-primary" type="button">Editar Albumes</button>
+            <button class="btn btn-primary" type="button" onclick="EditarAlbumButton();">Editar Albumes</button>
             <button class="btn btn-primary" type="button" onclick="CerrarButton();">Cerrar Sesion</button>
           </div>
         </div>
@@ -101,10 +101,6 @@ var idUser = url.searchParams.get("id");
 var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
 var theUrl = "http://localhost:3000/usuarios/" + idUser;
 
-function getData() {
-  //alert("Image is loaded");
-}
-
 xmlhttp.open("GET", theUrl);
 xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 xmlhttp.onload  = function() {
@@ -124,6 +120,10 @@ xmlhttp.onload  = function() {
 xmlhttp.send();
 
 console.log(idUser);
+
+function EditarAlbumButton(){
+  document.location='editaralbum.html?id='+ idUser;
+}
 
 function CerrarButton(){
   document.location = 'index.html';

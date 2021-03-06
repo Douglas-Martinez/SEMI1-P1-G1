@@ -34,7 +34,7 @@
   <link href="css/form-validation.css" rel="stylesheet">
 </head>
 
-<body class="bg-light">
+<body onload="CargaSelect();" class="bg-light">
 
   <div class="container">
     <main>
@@ -47,28 +47,21 @@
           <form class="needs-validation" novalidate>
             <div class="row g-3">
               <div class="col-12">
-                <label for="firstName" class="form-label">Nombre de Album</label>
-                <input type="text" class="form-control" id="firstName" placeholder="" value="" required>
+                <label for="album1" class="form-label">Nombre de Album</label>
+                <input type="text" class="form-control" id="album1" placeholder="" value="" required>
               </div>
 
               <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <button class="btn btn-primary" type="button">Crear</button>
+                <button onclick="CrearButton();" class="btn btn-primary" type="button">Crear</button>
               </div>
 
               <div class="col-12">
                 <label for="firstName" class="form-label">Seleccionar Album</label>
               </div>
 
-              <div class="btn-group" role="group">
-                <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle"
-                  data-bs-toggle="dropdown" aria-expanded="false">
-                  Album
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                  <li><a class="dropdown-item" href="#">Album 1</a></li>
-                  <li><a class="dropdown-item" href="#">Album 2</a></li>
-                </ul>
-              </div>
+              <select id="albumes" class="form-control md-form">
+                <option value="" disabled selected>Escoger Album</option>
+              </select>
 
               <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <button class="btn btn-primary" type="button">Eliminar</button>
@@ -90,5 +83,72 @@
   </div>
   <script src="js/form-validation.js"></script>
 </body>
-
 </html>
+
+<script>
+  var url_string = window.location.href; //window.location.href
+  var url = new URL(url_string);
+  var idUser = url.searchParams.get("id");
+  var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+  var theUrl = "http://localhost:3000/albumes/" + idUser;
+
+  function CrearButton() {
+    var album1 = document.getElementById("album1").value;
+
+    xmlhttp.open("POST", theUrl);
+    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlhttp.onload  = function() {
+      var jsonResponse = JSON.parse(xmlhttp.responseText);
+      // do something with jsonResponse
+      if(jsonResponse.estado == "OK"){
+        console.log("Album creado")
+
+        var select = document.getElementById("albumes");
+        var length = select.options.length;
+        for (i = length-1; i > 0; i--) {
+          select.options[i] = null;
+        }
+
+        CargaSelect();
+        
+      } else {
+        console.log("No se pudo crear el album")
+      }
+
+    };
+
+    xmlhttp.send(JSON.stringify({ "nombre": album1 }));
+
+  }
+
+  function CargaSelect() {
+
+    xmlhttp.open("GET", theUrl);
+    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlhttp.onload  = function() {
+      var jsonResponse = JSON.parse(xmlhttp.responseText);
+      // do something with jsonResponse
+      if(jsonResponse.estado == "OK"){
+        console.log("Albumes encontrados")
+
+        for (let index = 0; index < jsonResponse.content.length; index++) {
+          const element = jsonResponse.content[index];
+
+          var option = document.createElement("option");
+          option.text = element.nombre_album;
+          option.value = element.id_album;
+          var select = document.getElementById("albumes");
+          select.appendChild(option);
+        }
+
+      } else {
+        console.log("No existen albumes")
+      }
+
+    };
+
+    xmlhttp.send();
+
+  }
+
+</script>
