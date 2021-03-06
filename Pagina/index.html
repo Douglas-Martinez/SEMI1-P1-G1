@@ -41,9 +41,9 @@
       <img class="mb-4" src="resources/camera.png" alt="" width="72" height="72">
       <h1 class="h3 mb-3 fw-normal">Inicio de Sesion</h1>
       <label for="user1" class="visually-hidden">Correo</label>
-      <input type="text" id="user1" class="form-control" placeholder="Correo" required autofocus>
+      <input type="email" id="user1" class="form-control" placeholder="Correo" autofocus>
       <label for="pass1" class="visually-hidden">Clave</label>
-      <input type="password" id="pass1" class="form-control" placeholder="Clave" required>
+      <input type="password" id="pass1" class="form-control" placeholder="Clave">
       <button class="w-100 btn btn-lg btn-primary" type="submit" onclick="LoginButton();">Iniciar Sesion</button>
       <hr />
       <button class="w-100 btn btn-lg btn-primary" type="submit" onclick="RegistroButton();">Registrarse</button>
@@ -74,6 +74,9 @@
       xmlhttp.onload  = function() {
         var jsonResponse = JSON.parse(xmlhttp.responseText);
         // do something with jsonResponse
+
+        console.log(jsonResponse);
+
         if(jsonResponse.estado == "OK"){
           
           document.location='inicio.html?id='+jsonResponse.content[0].id_usuario;
