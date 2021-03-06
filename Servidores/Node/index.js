@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const uuid = require('uuid');
+const md5 = require('md5');
 
 //MYSQL
 const mysql = require('mysql');
@@ -55,9 +56,16 @@ app.post('/', function (req, res) {
 //Registro
 app.post("/usuarios", async (req, res) => {
     let body = req.body;
-    //Ingresar imagen al bucket
+    
+    let nombreimagen = body.fperfil;    
+    if(body.imagen != ""){
+        const aux = body.imagen;
+        const tipo = aux.split(';')[0].split('/')[1];
 
-    let sql = `INSERT INTO usuario (username, nombre, password, im_perfil) VALUES ('${body.username}', '${body.nombre}', '${body.password}', '${body.fperfil}');`;
+        nombreimagen = nombreimagen + '.' + tipo;
+    }
+
+    let sql = `INSERT INTO usuario (username, nombre, password, im_perfil) VALUES ('${body.username}', '${body.nombre}', '${md5(body.password)}', '${nombreimagen}');`;
 
     conn.query(sql, (err, result) => {
         if(err) {
@@ -91,6 +99,21 @@ app.post("/usuarios", async (req, res) => {
                         throw err
                     }
                     console.log(`File uploaded successfully. ${data.Location}`)
+
+                    conn.query(`INSERT INTO foto_perfil (nombre_imagen, id_usuario) VALUES ('${nombreimagen}', ${result.insertId})`, (e, r) => {
+                        if(e) {
+                            console.log(e.message);
+
+                            res.json({
+                                estado: "ERR",
+                                mensaje: 'Error al registrar la foto de perfil',
+                                content: e.message
+                            });
+                        } else {
+                            console.log('Imagen registrada con exito');
+                            console.log(r);
+                        }
+                    });
                 });
             }
     
@@ -106,7 +129,9 @@ app.post("/usuarios", async (req, res) => {
 //Loggin y Perfil
 app.post("/usuarios/login", async (req, res) => {
     let body = req.body;
-    let sqlGet = `SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE username = '${body.username}' AND password = '${body.password}';`;
+    console.log(body);
+    
+    let sqlGet = `SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE username = '${body.username}' AND password = '${md5(body.password)}';`;
 
 
     conn.query(sqlGet, (err, result) => {
