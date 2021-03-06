@@ -361,6 +361,7 @@ app.delete('/albumes/:id?', async (req, res) => {
         }
     });
 });
+// Subir fotos
 app.post("/fotos/:id?", async (req, res) => {
     let id = parseInt(req.params.id, 10);
     let body = req.body;
@@ -417,11 +418,13 @@ app.post("/fotos/:id?", async (req, res) => {
         }
     });
 });
+// Ver todas las fotos
 app.get('/fotos/:id?', async (req, res) => {
     let id = parseInt(req.params.id, 10);
 
     let contenido = {};
-
+    
+    let sqlperfil = `SELECT id_fperfil, nombre_imagen FROM foto_perfil WHERE id_usuario = ${id};`;
     let sql = `SELECT F.id_foto, F.nombre_foto, A.id_album, A.nombre_album
             FROM foto F, album A, usuario U
             WHERE F.id_album = A.id_album
@@ -440,22 +443,40 @@ app.get('/fotos/:id?', async (req, res) => {
                 content: err.message
             });
         } else {
-            console.log(result);
+            //console.log(result);
 
             if(result == '') {
-                res.json({
-                    estado: "OK",
-                    mensaje: "No hay imagenes por el momento",
-                    content: result
-                });
+                contenido.fotos = []
             } else {
                 console.log(result);
-
-                res.json({
-                    estado: "OK",
-                    content: result
-                });
+                contenido.fotos = result;
             }
+
+            conn.query(sqlperfil, (e,r) => {
+                if(e) {
+                    console.log(e.message);
+
+                    res.json({
+                        estado: "ERR",
+                        mensaje: 'Error al obtener fotos de perfil',
+                        content: e.message
+                    });
+                } else {
+                    //console.log(r);
+                    
+                    if(r == '') {
+                        contenido.perfil = []
+                    } else {
+                        console.log(r);
+                        contenido.perfil = r;
+                    }
+                    
+                    res.json({
+                        estado: "OK",
+                        content: contenido
+                    });
+                }
+            });
         }
     });
 });
