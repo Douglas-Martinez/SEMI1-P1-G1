@@ -167,6 +167,37 @@ def crearAlbumes(id):
         content = "Todo",
     )
 
+#Ver Fotos
+@app.route('/fotos/<id>', methods = ['GET'])
+def obtenerFotos(id):
+    print("ID: " + id)
+    contenidoFoto = []
+    contenidoPerfil = []
+
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT F.id_foto, F.nombre_foto, A.id_album, A.nombre_album FROM foto F, album A, usuario U WHERE F.id_album = A.id_album AND A.id_usuario = U.id_usuario AND U.id_usuario = %s ORDER BY A.id_album', (id))
+    
+    result1 = cur.fetchall()
+
+    if(result1):
+        contenidoFoto = result1
+    
+    cur.execute('SELECT id_fperfil, nombre_imagen FROM foto_perfil WHERE id_usuario = %s', (id))
+    
+    result1 = cur.fetchall()
+
+    if(result1):
+        contenidoPerfil = result1
+
+    lol = {
+        "fotos": contenidoFoto,
+        "perfil": contenidoPerfil
+    }
+
+    return jsonify(
+        estado = "OK",
+        content = lol,
+    )
 
 @app.route('/edit')
 def edit_contact():
