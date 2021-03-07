@@ -24,8 +24,8 @@ const app = express();
 //Middlewares
 app.set('json spaces', 2);
 app.use(morgan('dev'));
-app.use(cors(
-    {
+app.use(
+    cors({
         origin: true,
         optionsSuccessStatus: 200
     }
@@ -131,13 +131,13 @@ app.post("/usuarios", async (req, res) => {
         }
     });
 });
+
 //Loggin y Perfil
 app.post("/usuarios/login", async (req, res) => {
     let body = req.body;
     console.log(body);
     
     let sqlGet = `SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE username = '${body.username}' AND password = '${md5(body.password)}';`;
-
 
     conn.query(sqlGet, (err, result) => {
         if(err) {
@@ -167,45 +167,26 @@ app.post("/usuarios/login", async (req, res) => {
         }
     });
 });
-//Perfil y Consultas
+
+//Inicio
 app.get("/usuarios/:id?", async (req, res) => {
     let id = parseInt(req.params.id, 10);
-    if(id) {
-        conn.query(`SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE id_usuario = ${id}`, (err, result) => {
-            if(err) {
-                console.log(err.message);
-                
+    
+    conn.query(`SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE id_usuario = ${id}`, (err, result) => {
+        if(err) {
+            console.log(err.message);
+            
+            res.json({
+                estado: "ERR",
+                mensaje: 'Error con los datos de la consulta SELECT USUARIO',
+                content: err.message
+            });
+        } else {
+            //console.log(result);
+            if(result == '') {
                 res.json({
                     estado: "ERR",
-                    mensaje: 'Error con los datos de la consulta SELECT USUARIO',
-                    content: err.message
-                });
-            } else {
-                //console.log(result);
-                if(result == '') {
-                    res.json({
-                        estado: "ERR",
-                        mensaje: `Error, no existe el usuario con id ${id}`
-                    });
-                } else {
-                    console.log(result);
-                    
-                    res.json({
-                        estado: "OK",
-                        content: result
-                    });
-                }
-            }
-        });
-    } else {
-        conn.query('SELECT * FROM usuario', (err, result) => {
-            if(err) {
-                console.log(err.message);
-                
-                res.json({
-                    estado: "ERR",
-                    mensaje: 'Error con los datos de la consulta SELECT * USUARIO',
-                    content: err.message
+                    mensaje: `Error, no existe el usuario con id ${id}`
                 });
             } else {
                 console.log(result);
@@ -215,9 +196,10 @@ app.get("/usuarios/:id?", async (req, res) => {
                     content: result
                 });
             }
-        });
-    }
+        }
+    });
 });
+
 //Editar Perfil (Solo se puede cambiar username)
 app.put('/usuarios/:id?', async (req, res) => {
     let id = parseInt(req.params.id, 10);
@@ -315,6 +297,7 @@ app.put('/usuarios/:id?', async (req, res) => {
         }
     });
 });
+
 //Editar Album - Crear
 app.post('/albumes/:id?', async (req, res) => {
     let id = parseInt(req.params.id, 10);
@@ -343,6 +326,7 @@ app.post('/albumes/:id?', async (req, res) => {
         }
     });
 });
+
 //Editar GET
 app.get('/albumes/:id?', async (req, res) => {
     let id = parseInt(req.params.id, 10);
@@ -377,6 +361,7 @@ app.get('/albumes/:id?', async (req, res) => {
         }
     });
 });
+
 //Editar Album - Eliminar
 app.delete('/albumes/:id?', async (req, res) => {
     let id = parseInt(req.params.id, 10);
@@ -414,6 +399,7 @@ app.delete('/albumes/:id?', async (req, res) => {
         }
     });
 });
+
 // Subir fotos
 app.post("/fotos/:id?", async (req, res) => {
     let id = parseInt(req.params.id, 10);
@@ -471,6 +457,7 @@ app.post("/fotos/:id?", async (req, res) => {
         }
     });
 });
+
 // Ver todas las fotos
 app.get('/fotos/:id?', async (req, res) => {
     let id = parseInt(req.params.id, 10);

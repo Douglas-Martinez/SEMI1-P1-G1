@@ -32,22 +32,6 @@ app.config['MYSQL_CURSORCLASS'] = "DictCursor"
 mysql = MySQL(app)
 CORS(app, supports_credentials = True, resources=r'/*')
 
-#Pagina de Inicio
-@app.route('/usuarios/<id>', methods = ['GET'])
-def main(id):
-    print("ID: " + id)
-
-    cur = mysql.connection.cursor()
-    cur.execute('SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE id_usuario = %s', (id,))
-    
-    result = cur.fetchall()
-    print(result)
-    
-    return jsonify(
-        estado = "OK",
-        content = result,
-    )
-
 #Registro de Usuarios
 @app.route('/usuarios', methods = ['POST'])
 def registro_usuario():
@@ -68,7 +52,6 @@ def registro_usuario():
         )
         mysql.connection.commit()
         
-        print('>>> ', end = "")
         print (cur.rowcount)
         
         if imagen != "":
@@ -96,11 +79,13 @@ def registro_usuario():
                             (nombreimg, cur.lastrowid)
                     )
                     mysql.connection.commit()
+
+                    print('Imagen registrada con exito')
                 except Exception as err:
                     print(err)
                     return jsonify(
                         estado = "ERR",
-                        mensaje = "Error al registrar la imagen",
+                        mensaje = "Error al registrar la foto de perfil",
                         content = err
                     )
             except Exception as er:
@@ -128,8 +113,8 @@ def registro_usuario():
 def login_usuario():
     username = request.json['username']
     hashmd5 = hashlib.md5(request.json['password'].encode()).hexdigest()
+    
     cur = mysql.connection.cursor()
-
     try:
         cur.execute('SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE username = %s AND password = %s',
             (username, hashmd5)
@@ -137,19 +122,77 @@ def login_usuario():
         mysql.connection.commit() #No deberia de dar error :v y si da pos F
 
         result = cur.fetchall()
-        print(result)
 
-        return jsonify(
-            estado = "OK",
-            mensaje = "Login exitoso",
-            content =  result
-        )
+        if result == ():
+            return jsonify(
+                estado = "ERR",
+                mensaje = "El username y password no coinciden"
+            )
+        else:
+            return jsonify(
+                estado = "OK",
+                mensaje = "Login exitoso",
+                content =  result
+            )
     except Exception as e:
         print(e)
-        
         return jsonify(
             estado = "ERR",
             mensaje = "Error en el login",
+            content = e
+        )
+
+#Pagina de Inicio
+@app.route('/usuarios/<id>', methods = ['GET'])
+def main(id):
+    print("ID: " + id)
+
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE id_usuario = %s', (id,))
+    try:
+        result = cur.fetchall()
+
+        if result == ():
+            return jsonify(
+                estado = "ERR",
+                mensaje = "El usuario no existe dentro del sistema"
+            )
+        else:
+            return jsonify(
+                estado = "OK",
+                content = result,
+            )
+    except Exception as e:
+        print(e)
+        return jsonify (
+            estado = "ERR",
+            mensaje = "Error al obtener los datos",
+            content = e
+        )
+
+#Crear Album
+@app.route('/albumes/<id>', methods = ['POST'])
+def crearAlbumes(id):
+    nombreAlbum = request.json['nombre']
+    print("ID: " + id)
+
+    cur = mysql.connection.cursor()
+    cur.execute('INSERT INTO album (nombre_album, id_usuario) VALUES ( %s , %s)', (nombreAlbum,id))
+    try:
+        mysql.connection.commit()
+        print(cur.rowcount)
+
+        return jsonify(
+            estado = "OK",
+            mensaje = "Album creado",
+            id = cur.lastrowid,
+            content = "Todo"
+        )
+    except Exception as e:
+        print(e)
+        return jsonify(
+            estado = "ERR",
+            mensaje = "Error con la creacion del album",
             content = e
         )
 
@@ -160,14 +203,21 @@ def getAlbumes(id):
 
     cur = mysql.connection.cursor()
     cur.execute('SELECT id_album, nombre_album FROM album WHERE id_usuario = %s', (id,))
-    
-    result = cur.fetchall()
-    print(result)
-    
-    return jsonify(
-        estado = "OK",
-        content = result,
-    )
+    try:
+        result = cur.fetchall()
+        print(result)
+
+        return jsonify(
+            estado = "OK",
+            content = result
+        )
+    except Exception as e:
+        print(e)
+        return jsonify(
+            estado = "ERR",
+            mensaje = "Error al obtener los album",
+            content = e
+        )    
 
 #Eliminar Albumes
 @app.route('/albumes/<id>', methods = ['DELETE'])
@@ -176,32 +226,41 @@ def deleteAlbumes(id):
 
     cur = mysql.connection.cursor()
     cur.execute('DELETE FROM album WHERE id_album = %s', (id,))
-    
-    mysql.connection.commit()
+    try:
+        mysql.connection.commit()
+        if cur.rowcount == 0:
+            return jsonify(
+                estado = "ERR",
+                mensaje = "No existe el album con el id proporcionado",
+                content = "Todo"
+            )
+        else:
+            return jsonify(
+                estado = "OK",
+                mensaje = "Album eliminado",
+                content = "Todo"
+            )
+    except Exception as e:
+        print(e)
+        return jsonify(
+            estado = "ERR",
+            mensaje = "Error con la operacion DELETE",
+            content = "Todo"
+        )
 
-    
-    return jsonify(
-        estado = "OK",
-        mensaje = "Album eliminado",
-        content = "Todo",
-    )
+#Subir Fotos
+@app.route('/fotos/<id>', methods = ['POST'])
+def subirFoto(id):
+    print('ID: ' + id)
 
-#Crear Album
-@app.route('/albumes/<id>', methods = ['POST'])
-def crearAlbumes(id):
-    nombreAlbum = request.json['nombre']
-    print("ID: " + id)
+    nombreimg = request.json['nombre']
+    imagen = request.json['imagen']
 
-    cur = mysql.connection.cursor()
-    cur.execute('INSERT INTO album (nombre_album, id_usuario) VALUES ( %s , %s)', (nombreAlbum,id))
+    if imagen != "":
+        aux = imagen
+        tipo = aux.split(';')[0].split('/')[1] 
+        nombreimg = nombreimg + "_" + str(uuid.uuid4()) + '.' + tipo
 
-    mysql.connection.commit()
-    
-    return jsonify(
-        estado = "OK",
-        mensaje = "Album creado",
-        content = "Todo",
-    )
 
 #Ver Fotos
 @app.route('/fotos/<id>', methods = ['GET'])
@@ -234,7 +293,6 @@ def obtenerFotos(id):
         estado = "OK",
         content = lol,
     )
-
 
 
 if __name__ == '__main__':

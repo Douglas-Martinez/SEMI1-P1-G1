@@ -112,8 +112,10 @@ xmlhttp.onload  = function() {
     document.getElementById("user1").value = jsonResponse.content[0].username; 
     document.getElementById("name1").value = jsonResponse.content[0].nombre; 
 
-    var img2 = document.getElementById("fotoPerfil");
-    img2.setAttribute('src', "https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Perfil/" + jsonResponse.content[0].im_perfil);
+    if(jsonResponse.content[0].im_perfil != "default") {
+      var img2 = document.getElementById("fotoPerfil");
+      img2.setAttribute('src', "https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Perfil/" + jsonResponse.content[0].im_perfil);
+    }
     
     //document.location = 'inicio.html'; //CREAR OTRO XML AQUI?
   } else {

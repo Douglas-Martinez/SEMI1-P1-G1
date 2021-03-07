@@ -98,23 +98,26 @@
   var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
 
   function SubirButton(){
-    var name = document.getElementById("name1").value; 
-    var e = document.getElementById("albumes");
-    //Id del album a subir
-    var idValor = e.value;
+    
+      var name = document.getElementById("name1").value; 
+      var e = document.getElementById("albumes");
+      //Id del album a subir
+      var idValor = e.value;
 
-    var theUrl = "http://localhost:3000/fotos/" + idValor;
-    xmlhttp.open("POST", theUrl);
-    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xmlhttp.onload  = function() {
-      var jsonResponse = JSON.parse(xmlhttp.responseText);
-      // do something with jsonResponse
-      console.log(jsonResponse)
+    if(imagenName != "" && idValor != "" && name != "") {
+      var theUrl = "http://localhost:3000/fotos/" + idValor;
+      xmlhttp.open("POST", theUrl);
+      xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      xmlhttp.onload  = function() {
+        var jsonResponse = JSON.parse(xmlhttp.responseText);
+        // do something with jsonResponse
+        console.log(jsonResponse)
 
-    };
-    xmlhttp.send(JSON.stringify({ "nombre": name, "imagen": imagenName}));
-
-
+      };
+      xmlhttp.send(JSON.stringify({ "nombre": name, "imagen": imagenName}));
+    } else {
+      console.log('No se ha seleccionado imagen, album o nombre de imagen');
+    }
   }
 
   function chooseFile() {
@@ -140,32 +143,32 @@
   }
 
   function CargaSelect() {
-  var theUrl = "http://localhost:3000/albumes/" + idUser;
-  xmlhttp.open("GET", theUrl);
-  xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-  xmlhttp.onload  = function() {
-    var jsonResponse = JSON.parse(xmlhttp.responseText);
-    // do something with jsonResponse
-    if(jsonResponse.estado == "OK"){
-      console.log("Albumes encontrados")
+    var theUrl = "http://localhost:3000/albumes/" + idUser;
+    xmlhttp.open("GET", theUrl);
+    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlhttp.onload  = function() {
+      var jsonResponse = JSON.parse(xmlhttp.responseText);
+      // do something with jsonResponse
+      if(jsonResponse.estado == "OK"){
+        console.log("Albumes encontrados")
 
-      for (let index = 0; index < jsonResponse.content.length; index++) {
-        const element = jsonResponse.content[index];
+        for (let index = 0; index < jsonResponse.content.length; index++) {
+          const element = jsonResponse.content[index];
 
-        var option = document.createElement("option");
-        option.text = element.nombre_album;
-        option.value = element.id_album;
-        var select = document.getElementById("albumes");
-        select.appendChild(option);
+          var option = document.createElement("option");
+          option.text = element.nombre_album;
+          option.value = element.id_album;
+          var select = document.getElementById("albumes");
+          select.appendChild(option);
+        }
+
+      } else {
+        console.log("No existen albumes")
       }
 
-    } else {
-      console.log("No existen albumes")
-    }
+    };
 
-  };
-
-  xmlhttp.send();
+    xmlhttp.send();
 
   }
 
