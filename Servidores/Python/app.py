@@ -95,6 +95,7 @@ def registro_usuario():
                     mensaje = "Error con la carga de la imagen",
                     content = er
                 )
+        
         return jsonify(
             estado = "OK",
             mensaje = "Usuario creado",
@@ -252,7 +253,6 @@ def deleteAlbumes(id):
 @app.route('/fotos/<id>', methods = ['POST'])
 def subirFoto(id):
     print('ID: ' + id)
-
     nombreimg = request.json['nombre']
     imagen = request.json['imagen']
 
@@ -261,6 +261,53 @@ def subirFoto(id):
         tipo = aux.split(';')[0].split('/')[1] 
         nombreimg = nombreimg + "_" + str(uuid.uuid4()) + '.' + tipo
 
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute('INSERT INTO foto (nombre_foto, id_album) VALUES (%s, %s)',
+            (nombreimg, id)
+        )
+        mysql.connection.commit()
+        
+        print (cur.rowcount)
+        
+        base = request.json['imagen']
+        todo = re.sub('^data:image\/\w+;base64,', '', base)
+        base64data = base64.b64decode(todo)
+        tipo = base.split(';')[0].split('/')[1] 
+
+        print(nombreimg)
+
+        try:
+            bucketN = 'practica1-g1-imagenes'
+            ubicacion = 'Fotos_Publicadas/' + nombreimg
+            obj = s3.Object(bucketN, ubicacion)
+            obj.put(
+                Body = base64data,
+                ACL = 'public-read',
+                ContentEncoding = 'base64',
+                ContentType = ('image/' + tipo)
+            )
+            print('Imagen cargada satisfactoriamente')
+            
+            return jsonify(
+                estado = "OK",
+                mensaje = "Fotografia publicada",
+                id = cur.lastrowid
+            )
+        except Exception as er:
+            print(er)
+            return jsonify(
+                estado = "ERR",
+                mensaje = "Error con la carga de la imagen a la nube",
+                content = er
+            )
+    except Exception as e:
+        print(e)
+        return jsonify(
+            estado = "ERR",
+            mensaje = "Error con la operacion de subir foto a la BD",
+            content = e
+        )
 
 #Ver Fotos
 @app.route('/fotos/<id>', methods = ['GET'])
