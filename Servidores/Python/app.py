@@ -25,11 +25,13 @@ app.config['MYSQL_PORT'] = creds_db['port']
 app.config['MYSQL_USER'] = creds_db['user']
 app.config['MYSQL_PASSWORD'] = creds_db['password']
 app.config['MYSQL_DB'] = creds_db['database']
+app.config['MYSQL_CURSORCLASS'] = "DictCursor"
 
 mysql = MySQL(app)
 CORS(app, supports_credentials = True, resources=r'/*')
 
-@app.route('/usuarios/<id>')
+#Pagina de Inicio
+@app.route('/usuarios/<id>', methods = ['GET'])
 def main(id):
     print("ID: " + id)
 
@@ -37,25 +39,16 @@ def main(id):
 
     h = hashlib.md5(ent.encode()).hexdigest()
 
-
     cur = mysql.connection.cursor()
-    cur.execute('SELECT * FROM usuario')
-    data = cur.fetchall()
-    cur.execute('INSERT INTO usuario () VALUES ()')
+    cur.execute('SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE id_usuario = %s', (id))
     
-    lol = []
-    for d in data:
-        lol.append({
-            "id_usuario": d[0],
-            "username": d[1],
-            "nombre": d[2],
-            "password": d[3],
-            "im_perfil": d[4]
-        })
+    result = cur.fetchone()
+    array = [result]
+    print(result)
     
     return jsonify(
         estado = "OK",
-        content = lol,
+        content = array,
         md5 = h
     )
 
@@ -99,6 +92,40 @@ def regirstro_usuario():
             mensaje = "Error con la operacion de registro",
             content = e
         )
+
+
+#Login
+@app.route('/usuarios/login', methods = ['POST'])
+def login_usuario():
+    username = request.json['username']
+    hashmd5 = hashlib.md5(request.json['password'].encode()).hexdigest()
+    cur = mysql.connection.cursor()
+
+    try:
+        cur.execute('SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE username = %s AND password = %s',
+            (username, hashmd5)
+        )
+        mysql.connection.commit() #No deberia de dar error :v y si da pos F
+
+        result = cur.fetchone()
+        array = [result]
+        print(result)
+
+        return jsonify(
+            estado = "OK",
+            mensaje = "Login exitoso",
+            content =  array
+        )
+    except Exception as e:
+        print(e)
+        
+        return jsonify(
+            estado = "ERR",
+            mensaje = "Error en el login",
+            content = e
+        )
+
+
 
 @app.route('/edit')
 def edit_contact():
