@@ -36,7 +36,7 @@ def main(id):
     print("ID: " + id)
 
     cur = mysql.connection.cursor()
-    cur.execute('SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE id_usuario = %s', (id))
+    cur.execute('SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE id_usuario = %s', (id,))
     
     result = cur.fetchall()
     print(result)
@@ -123,7 +123,7 @@ def getAlbumes(id):
     print("ID: " + id)
 
     cur = mysql.connection.cursor()
-    cur.execute('SELECT id_album, nombre_album FROM album WHERE id_usuario = %s', (id))
+    cur.execute('SELECT id_album, nombre_album FROM album WHERE id_usuario = %s', (id,))
     
     result = cur.fetchall()
     print(result)
@@ -175,14 +175,14 @@ def obtenerFotos(id):
     contenidoPerfil = []
 
     cur = mysql.connection.cursor()
-    cur.execute('SELECT F.id_foto, F.nombre_foto, A.id_album, A.nombre_album FROM foto F, album A, usuario U WHERE F.id_album = A.id_album AND A.id_usuario = U.id_usuario AND U.id_usuario = %s ORDER BY A.id_album', (id))
+    cur.execute('SELECT F.id_foto, F.nombre_foto, A.id_album, A.nombre_album FROM foto F, album A, usuario U WHERE F.id_album = A.id_album AND A.id_usuario = U.id_usuario AND U.id_usuario = %s ORDER BY A.id_album', (id,))
     
     result1 = cur.fetchall()
 
     if(result1):
         contenidoFoto = result1
     
-    cur.execute('SELECT id_fperfil, nombre_imagen FROM foto_perfil WHERE id_usuario = %s', (id))
+    cur.execute('SELECT id_fperfil, nombre_imagen FROM foto_perfil WHERE id_usuario = %s', (id,))
     
     result1 = cur.fetchall()
 
