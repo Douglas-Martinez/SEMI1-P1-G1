@@ -1,6 +1,8 @@
 import boto3
 import hashlib
 import base64
+import uuid
+import re
 import sys
 from flask import Flask, request, jsonify, json
 
@@ -10,7 +12,7 @@ from db import db_credentials
 from creds import aws_keys
 
 creds_s3 = aws_keys['s3']
-client = boto3.client(
+s3 = boto3.resource(
             's3',
             region_name = creds_s3['region'],
             aws_access_key_id = creds_s3['accessKeyId'],
@@ -48,31 +50,66 @@ def main(id):
 
 #Registro de Usuarios
 @app.route('/usuarios', methods = ['POST'])
-def regirstro_usuario():
+def registro_usuario():
     nombreimg = request.json['fperfil']
     imagen = request.json['imagen']
-
-    if imagen != "":
-        aux = imagen
-        tipo = aux.split(';')[0].split('/')[1]
-        
-        nombreimg = nombreimg + '.' + tipo
     
     hashmd5 = hashlib.md5(request.json['password'].encode()).hexdigest()
 
-    cur = mysql.connection.cursor()
+    if imagen != "":
+        aux = imagen
+        tipo = aux.split(';')[0].split('/')[1] 
+        nombreimg = nombreimg + "_" + str(uuid.uuid4()) + '.' + tipo
     
+    cur = mysql.connection.cursor()
     try:
         cur.execute('INSERT INTO usuario (username, nombre, password, im_perfil) VALUES (%s, %s, %s, %s)',
             (request.json['username'], request.json['nombre'], hashmd5, nombreimg)
         )
-        mysql.connection.commit() #No deberia de dar error :v y si da pos F
+        mysql.connection.commit()
+        
         print('>>> ', end = "")
         print (cur.rowcount)
         
         if imagen != "":
-            base = imagen
+            base = request.json['imagen']
+            todo = re.sub('^data:image\/\w+;base64,', '', base)
+            base64data = base64.b64decode(todo)
+            tipo = base.split(';')[0].split('/')[1] 
+            print(nombreimg)
 
+            try:
+                bucketN = 'practica1-g1-imagenes'
+                ubicacion = 'Fotos_Perfil/' + nombreimg
+                obj = s3.Object(bucketN, ubicacion)
+                obj.put(
+                    Body = base64data,
+                    ACL = 'public-read',
+                    ContentEncoding = 'base64',
+                    ContentType = ('image/' + tipo)
+                )
+                print('Imagen cargada satisfactoriamente.')
+
+                cur2 = mysql.connection.cursor()
+                try:
+                    cur2.execute('INSERT INTO foto_perfil (nombre_imagen, id_usuario) VALUES (%s, %s)', 
+                            (nombreimg, cur.lastrowid)
+                    )
+                    mysql.connection.commit()
+                except Exception as err:
+                    print(err)
+                    return jsonify(
+                        estado = "ERR",
+                        mensaje = "Error al registrar la imagen",
+                        content = err
+                    )
+            except Exception as er:
+                print(er)
+                return jsonify(
+                    estado = "ERR",
+                    mensaje = "Error con la carga de la imagen",
+                    content = er
+                )
         return jsonify(
             estado = "OK",
             mensaje = "Usuario creado",
@@ -80,7 +117,6 @@ def regirstro_usuario():
         )
     except Exception as e:
         print(e)
-        
         return jsonify(
             estado = "ERR",
             mensaje = "Error con la operacion de registro",
@@ -199,13 +235,7 @@ def obtenerFotos(id):
         content = lol,
     )
 
-@app.route('/edit')
-def edit_contact():
-    return 'Editar contacto'
 
-@app.route('/delete')
-def delete_contact():
-    return 'Eliminar contacto'
 
 if __name__ == '__main__':
     app.run(debug = True, port = 3000)

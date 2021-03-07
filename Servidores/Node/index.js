@@ -92,7 +92,7 @@ app.post("/usuarios", async (req, res) => {
 
                 const params = {
                     Bucket: 'practica1-g1-imagenes',
-                    Key: `Fotos_Perfil/${userId}.${type}`, // type is not required
+                    Key: `Fotos_Perfil/${nombreimagen}`, // type is not required
                     Body: base64Data,
                     ACL: 'public-read',
                     ContentEncoding: 'base64', // required
