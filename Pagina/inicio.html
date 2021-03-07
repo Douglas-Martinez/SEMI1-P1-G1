@@ -47,7 +47,7 @@
 
           <form class="card p-2">
             <div class="col-12">
-              <img src="resources/no-photo.jpg" alt="..." class="img-thumbnail">
+              <img id="fotoPerfil" src="resources/no-photo.jpg" alt="..." class="img-thumbnail">
             </div>
           </form>
         </div>
@@ -111,6 +111,9 @@ xmlhttp.onload  = function() {
     console.log(jsonResponse.content[0]);
     document.getElementById("user1").value = jsonResponse.content[0].username; 
     document.getElementById("name1").value = jsonResponse.content[0].nombre; 
+
+    var img2 = document.getElementById("fotoPerfil");
+    img2.setAttribute('src', "https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Perfil/" + jsonResponse.content[0].im_perfil);
     
     //document.location = 'inicio.html'; //CREAR OTRO XML AQUI?
   } else {
@@ -118,8 +121,6 @@ xmlhttp.onload  = function() {
   }
 };
 xmlhttp.send();
-
-console.log(idUser);
 
 function VerFotosButton(){
   document.location='verfotos.html?id='+ idUser;

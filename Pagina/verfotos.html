@@ -44,12 +44,12 @@
     <link href="css/form-validation.css" rel="stylesheet">
 </head>
 
-<body class="bg-light">
+<body  class="bg-light">
 
     <div class="container">
         <main>
             <div class="py-5 text-center">
-                <h2>Ver Fotos</h2>
+                <h2>Albumes</h2>
             </div>
 
             <div class="row g-3">
@@ -57,15 +57,15 @@
 
                     <form class="card p-2">
                         <div class="col-12">
-                            <img src="resources/no-photo.jpg" alt="..." class="img-thumbnail">
+                            <img id="fotoPer" src="resources/no-photo.jpg" alt="..." class="img-thumbnail">
                         </div>
 
                         <hr class="my-4">
 
                         <div class="d-grid gap-2">
-                            <button class="btn btn-primary" type="button">Subir Foto</button>
-                            <button class="btn btn-primary" type="button">Editar Albumes</button>
-                            <button class="btn btn-primary" type="button">Regresar</button>
+                            <button class="btn btn-primary" type="button" onclick="SubirFotoButton();">Subir Foto</button>
+                            <button class="btn btn-primary" type="button" onclick="EditarAlbumButton();">Editar Albumes</button>
+                            <button class="btn btn-primary" type="button" onclick="RegresarButton();">Regresar</button>
                         </div>
                     </form>
                 </div>
@@ -73,7 +73,6 @@
                     <div class="container">
                         <div class="row">
                             <div id = "albumes" class="col-12">
-                                <h1 class="page-title">Albumes</h1>
                             </div>
                         </div>
                     </div>
@@ -104,19 +103,46 @@
     var jsonResponse = JSON.parse(xmlhttp.responseText);
     // do something with jsonResponse
     if(jsonResponse.estado == "OK"){
-        
-        console.log(jsonResponse.content);
 
-        var result = jsonResponse.content.reduce(function (r, a) {
+        var result = jsonResponse.content.fotos.reduce(function (r, a) {
                 r[a.nombre_album] = r[a.nombre_album] || [];
                 r[a.nombre_album].push(a);
                 return r;
             }, Object.create(null));
 
-        for (let index = 0; index < result.length; index++) {
-            const element = result[index];
+        
+        var select = document.getElementById("albumes");
+        var h3=document.createElement("h3");
+        h3.className = "gallery-title";
+        h3.textContent = "Fotos de Perfil";
+
+        select.appendChild(h3);
+
+        var div=document.createElement("div");
+        div.className = "row";
+
+        for (let index = 0; index < jsonResponse.content.perfil.length; index++) {
             
+            const element = jsonResponse.content.perfil[index];
+            var a = document.createElement("a");
+            a.className = "col-lg-3 col-md-4 col-6 my-3";
+            a.setAttribute('href', "https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Perfil/" + element.nombre_imagen);
+            a.setAttribute('data-toggle', "lightbox");
+            a.setAttribute('data-gallery', "example-gallery");
+
+            var img = document.createElement("img");
+            img.className = "img-fluid card";
+            img.setAttribute('src', "https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Perfil/" + element.nombre_imagen);
+
+            a.appendChild(img);
+            div.appendChild(a);
+
+            var img2 = document.getElementById("fotoPer");
+            img2.className = "img-thumbnail";
+            img2.setAttribute('src', "https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Perfil/" + element.nombre_imagen);
         }
+
+        select.appendChild(div);
 
         Object.keys(result).forEach(function(key) {
             var value = result[key];
@@ -146,7 +172,6 @@
                 a.appendChild(img);
                 div.appendChild(a);
                 
-                console.log(element.nombre_foto);
             }
             
             select.appendChild(div);
@@ -163,6 +188,17 @@
     };
     xmlhttp.send();
 
-    console.log(idUser);
+    function SubirFotoButton(){
+        document.location='subirfoto.html?id='+ idUser;
+    }
+
+    function EditarAlbumButton(){
+        document.location='editaralbum.html?id='+ idUser;
+    }
+
+    function RegresarButton(){
+        document.location='inicio.html?id='+ idUser;
+    }
+
 
 </script>
