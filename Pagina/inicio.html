@@ -47,7 +47,7 @@
 
           <form class="card p-2">
             <div class="col-12">
-              <img src="resources/no-photo.jpg" alt="..." class="img-thumbnail">
+              <img id="fotoPerfil" src="resources/no-photo.jpg" alt="..." class="img-thumbnail">
             </div>
           </form>
         </div>
@@ -75,7 +75,7 @@
           <div class="d-grid gap-2">
             <button class="btn btn-primary" type="button" onclick="SubirFotoButton();">Subir Foto</button>
             <button class="btn btn-primary" type="button" onclick="VerFotosButton();">Ver Fotos</button>
-            <button class="btn btn-primary" type="button">Editar Perfil</button>
+            <button class="btn btn-primary" type="button" onclick="EditarPerfilButton();">Editar Perfil</button>
             <button class="btn btn-primary" type="button" onclick="EditarAlbumButton();">Editar Albumes</button>
             <button class="btn btn-primary" type="button" onclick="CerrarButton();">Cerrar Sesion</button>
           </div>
@@ -111,6 +111,9 @@ xmlhttp.onload  = function() {
     console.log(jsonResponse.content[0]);
     document.getElementById("user1").value = jsonResponse.content[0].username; 
     document.getElementById("name1").value = jsonResponse.content[0].nombre; 
+
+    var img2 = document.getElementById("fotoPerfil");
+    img2.setAttribute('src', "https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Perfil/" + jsonResponse.content[0].im_perfil);
     
     //document.location = 'inicio.html'; //CREAR OTRO XML AQUI?
   } else {
@@ -118,8 +121,6 @@ xmlhttp.onload  = function() {
   }
 };
 xmlhttp.send();
-
-console.log(idUser);
 
 function VerFotosButton(){
   document.location='verfotos.html?id='+ idUser;
@@ -131,6 +132,10 @@ function SubirFotoButton(){
 
 function EditarAlbumButton(){
   document.location='editaralbum.html?id='+ idUser;
+}
+
+function EditarPerfilButton(){
+  document.location='editarperfil.html?id='+ idUser;
 }
 
 function CerrarButton(){

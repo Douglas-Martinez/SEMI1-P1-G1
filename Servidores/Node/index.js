@@ -67,7 +67,7 @@ app.post("/usuarios", async (req, res) => {
         const aux = body.imagen;
         const tipo = aux.split(';')[0].split('/')[1];
 
-        nombreimagen = nombreimagen + '.' + tipo;
+        nombreimagen = nombreimagen + '_' + uuid.v4() + '.' + tipo;
     }
 
     let sql = `INSERT INTO usuario (username, nombre, password, im_perfil) VALUES ('${body.username}', '${body.nombre}', '${md5(body.password)}', '${nombreimagen}');`;
@@ -222,9 +222,19 @@ app.get("/usuarios/:id?", async (req, res) => {
 app.put('/usuarios/:id?', async (req, res) => {
     let id = parseInt(req.params.id, 10);
     let body = req.body;
+
+    let nombreimagen = body.fperfil;    
+    if(body.imagen != ""){
+        const aux = body.imagen;
+        const tipo = aux.split(';')[0].split('/')[1];
+
+        nombreimagen = nombreimagen + '_' + uuid.v4() + '.' + tipo;
+
+        body.fperfil = nombreimagen;
+    }
     
     //Verifico contraseña
-    conn.query(`SELECT * FROM usuario WHERE id_usuario = ${id} AND password = '${body.password}';`, (err, result) => {
+    conn.query(`SELECT * FROM usuario WHERE id_usuario = ${id} AND password = '${md5(body.password)}';`, (err, result) => {
         if(err) {
             console.log(err.message);
             
@@ -255,6 +265,44 @@ app.put('/usuarios/:id?', async (req, res) => {
                         });
                     } else {
                         console.log(result2);
+
+                        if(body.imagen != ""){
+                            var base64 = body.imagen;
+                            const base64Data = new Buffer.from(base64.replace(/^data:image\/\w+;base64,/, ""), 'base64');
+                            const type = base64.split(';')[0].split('/')[1];
+                            const userId = body.fperfil;
+            
+                            const params = {
+                                Bucket: 'practica1-g1-imagenes',
+                                Key: `Fotos_Perfil/${userId}`, // type is not required
+                                Body: base64Data,
+                                ACL: 'public-read',
+                                ContentEncoding: 'base64', // required
+                                ContentType: `image/${type}` // required. Notice the back ticks
+                            }
+                            
+                            s3.upload(params, function(err, data) {
+                                if (err) {
+                                    throw err
+                                }
+                                console.log(`File uploaded successfully. ${data.Location}`)
+            
+                                conn.query(`INSERT INTO foto_perfil (nombre_imagen, id_usuario) VALUES ('${nombreimagen}', ${id})`, (e, r) => {
+                                    if(e) {
+                                        console.log(e.message);
+            
+                                        res.json({
+                                            estado: "ERR",
+                                            mensaje: 'Error al registrar la foto de perfil',
+                                            content: e.message
+                                        });
+                                    } else {
+                                        console.log('Imagen registrada con exito');
+                                        console.log(r);
+                                    }
+                                });
+                            });
+                        }
 
                         res.json({
                             estado: "OK",

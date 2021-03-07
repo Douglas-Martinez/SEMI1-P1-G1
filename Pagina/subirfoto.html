@@ -73,6 +73,8 @@
 
             <hr class="my-4">
 
+            <button class="btn btn-primary" type="button" onclick="RegresarButton();">Regresar</button>
+
           </form>
         </div>
       </div>
@@ -165,5 +167,9 @@
 
   xmlhttp.send();
 
+  }
+
+  function RegresarButton(){
+      document.location='inicio.html?id='+ idUser;
   }
 </script>

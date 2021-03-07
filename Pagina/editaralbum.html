@@ -64,13 +64,15 @@
               </select>
 
               <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <button class="btn btn-primary" type="button">Eliminar</button>
+                <button class="btn btn-primary" type="button" onclick="EliminarButton();">Eliminar</button>
               </div>
 
             </div>
 
             <hr class="my-4">
 
+            <button class="btn btn-primary" type="button" onclick="RegresarButton();">Regresar</button>
+            
           </form>
         </div>
       </div>
@@ -90,11 +92,10 @@
   var url = new URL(url_string);
   var idUser = url.searchParams.get("id");
   var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
-  var theUrl = "http://localhost:3000/albumes/" + idUser;
 
   function CrearButton() {
     var album1 = document.getElementById("album1").value;
-
+    var theUrl = "http://localhost:3000/albumes/" + idUser;
     xmlhttp.open("POST", theUrl);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlhttp.onload  = function() {
@@ -121,8 +122,39 @@
 
   }
 
-  function CargaSelect() {
+  function EliminarButton() {
+    var select = document.getElementById("albumes");
+    //Id del album a subir
+    var idValor = select.value;
 
+    var theUrl = "http://localhost:3000/albumes/" + idValor;
+    xmlhttp.open("DELETE", theUrl);
+    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlhttp.onload  = function() {
+      var jsonResponse = JSON.parse(xmlhttp.responseText);
+      // do something with jsonResponse
+      if(jsonResponse.estado == "OK"){
+        console.log("Album eliminado")
+
+        var length = select.options.length;
+        for (i = length-1; i > 0; i--) {
+          select.options[i] = null;
+        }
+
+        CargaSelect();
+
+      } else {
+        console.log("No se pudo eliminar album")
+      }
+
+    };
+
+    xmlhttp.send();
+
+  }
+
+  function CargaSelect() {
+    var theUrl = "http://localhost:3000/albumes/" + idUser;
     xmlhttp.open("GET", theUrl);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlhttp.onload  = function() {
@@ -148,7 +180,10 @@
     };
 
     xmlhttp.send();
+  }
 
+  function RegresarButton(){
+      document.location='inicio.html?id='+ idUser;
   }
 
 </script>
