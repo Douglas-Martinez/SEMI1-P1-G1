@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 var uuid = require('uuid');
 const md5 = require('md5');
+const crypto = require('crypto');
 
 //MYSQL
 const mysql = require('mysql');
@@ -14,6 +15,7 @@ var conn = mysql.createPool(db_credentials);
 //AWS
 const AWS = require('aws-sdk');
 const aws_keys = require('./credentials/creds');
+const { Buffer } = require('buffer');
 const s3 = new AWS.S3(aws_keys.s3);
 
 //Configuration
@@ -42,6 +44,10 @@ app.use(
 );
 
 //Rutas - app.use('/', router);
+app.get('/', function (req, res) {
+    var inp = '1234alv';
+    res.send(`Salida: ${md5(inp)}`);
+});
 //RegistroGET para pruebas
 app.post('/', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
