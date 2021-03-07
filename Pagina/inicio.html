@@ -75,7 +75,7 @@
           <div class="d-grid gap-2">
             <button class="btn btn-primary" type="button" onclick="SubirFotoButton();">Subir Foto</button>
             <button class="btn btn-primary" type="button" onclick="VerFotosButton();">Ver Fotos</button>
-            <button class="btn btn-primary" type="button">Editar Perfil</button>
+            <button class="btn btn-primary" type="button" onclick="EditarPerfilButton();">Editar Perfil</button>
             <button class="btn btn-primary" type="button" onclick="EditarAlbumButton();">Editar Albumes</button>
             <button class="btn btn-primary" type="button" onclick="CerrarButton();">Cerrar Sesion</button>
           </div>
@@ -132,6 +132,10 @@ function SubirFotoButton(){
 
 function EditarAlbumButton(){
   document.location='editaralbum.html?id='+ idUser;
+}
+
+function EditarPerfilButton(){
+  document.location='editarperfil.html?id='+ idUser;
 }
 
 function CerrarButton(){

@@ -89,6 +89,10 @@
 
             <button type="button" class="w-100 btn btn-primary btn-lg" onclick="RegistroButton();">Registrarte</button>
           </form>
+
+          <hr class="my-4">
+          
+          <button class="btn btn-primary" type="button" onclick="RegresarButton();">Regresar</button>
         </div>
       </div>
     </main>
@@ -138,7 +142,7 @@
     
     if(pass == veri){
       
-      if(imagenName != "")fperfil = user + 1;
+      if(imagenName != "")fperfil = user;
 
       xmlhttp.open("POST", theUrl);
       xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -153,6 +157,10 @@
     } else {
       console.log("No coinciden las claves");
     }
+  }
+
+  function RegresarButton(){
+      document.location='index.html';
   }
 
 </script>
