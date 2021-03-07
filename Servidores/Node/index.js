@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 var uuid = require('uuid');
 const md5 = require('md5');
-const crypto = require('crypto');
 
 //MYSQL
 const mysql = require('mysql');
