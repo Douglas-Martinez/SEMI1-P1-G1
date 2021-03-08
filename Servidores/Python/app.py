@@ -32,6 +32,14 @@ app.config['MYSQL_CURSORCLASS'] = "DictCursor"
 mysql = MySQL(app)
 CORS(app, supports_credentials = True, resources=r'/*')
 
+#Confirmacion
+@app.route('/', methods = ['GET'])
+def confirmExist():
+    return jsonify (
+            estado = "OK"
+        )
+
+
 #Registro de Usuarios
 @app.route('/usuarios', methods = ['POST'])
 def registro_usuario():
@@ -249,6 +257,90 @@ def deleteAlbumes(id):
             content = "Todo"
         )
 
+#EditarPerfil
+@app.route('/usuarios/<id>', methods = ['PUT'])
+def editarPerfil(id):
+    print('ID: ' + id)
+    imagen = request.json['imagen']
+    nombreimagen = request.json['fperfil']
+    fperfil = request.json['fperfil']
+
+    hashmd5 = hashlib.md5(request.json['password'].encode()).hexdigest()
+
+    if imagen != "":
+        aux = imagen
+        tipo = aux.split(';')[0].split('/')[1] 
+        nombreimagen = nombreimagen + "_" + str(uuid.uuid4()) + '.' + tipo
+
+        fperfil = nombreimagen
+
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT * FROM usuario WHERE id_usuario = %s AND password = %s', (id,hashmd5))
+
+    result = cur.fetchall()
+
+    if(result):
+        cur.execute('UPDATE usuario SET username = %s, nombre = %s, im_perfil = %s WHERE id_usuario = %s', (request.json['username'],request.json['nombre'],fperfil, id))
+        mysql.connection.commit()
+
+        print (cur.rowcount)
+        
+        if imagen != "":
+            base = request.json['imagen']
+            todo = re.sub('^data:image\/\w+;base64,', '', base)
+            base64data = base64.b64decode(todo)
+            tipo = base.split(';')[0].split('/')[1] 
+            print(fperfil)
+
+            try:
+                bucketN = 'practica1-g1-imagenes'
+                ubicacion = 'Fotos_Perfil/' + fperfil
+                obj = s3.Object(bucketN, ubicacion)
+                obj.put(
+                    Body = base64data,
+                    ACL = 'public-read',
+                    ContentEncoding = 'base64',
+                    ContentType = ('image/' + tipo)
+                )
+                print('Imagen cargada satisfactoriamente.')
+
+                cur2 = mysql.connection.cursor()
+                try:
+                    cur2.execute('INSERT INTO foto_perfil (nombre_imagen, id_usuario) VALUES (%s, %s)', 
+                            (fperfil, id)
+                    )
+                    mysql.connection.commit()
+
+                    print('Imagen registrada con exito')
+                except Exception as err:
+                    print(err)
+                    return jsonify(
+                        estado = "ERR",
+                        mensaje = "Error al registrar la foto de perfil",
+                        content = err
+                    )
+            except Exception as er:
+                print(er)
+                return jsonify(
+                    estado = "ERR",
+                    mensaje = "Error con la carga de la imagen",
+                    content = er
+                )
+        return jsonify(
+                estado = "OK",
+                mensaje = "Perfil actualizado",
+                content = cur.rowcount
+            )
+    else:
+        print("Error de confirmacion")
+
+        return jsonify(
+                estado = "ERR",
+                mensaje = "Error con actualizar los datos",
+                content = "Nada"
+            )
+
+
 #Subir Fotos
 @app.route('/fotos/<id>', methods = ['POST'])
 def subirFoto(id):
@@ -340,7 +432,6 @@ def obtenerFotos(id):
         estado = "OK",
         content = lol,
     )
-
 
 if __name__ == '__main__':
     app.run(debug = True, port = 3000)

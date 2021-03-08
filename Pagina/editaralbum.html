@@ -95,7 +95,7 @@
 
   function CrearButton() {
     var album1 = document.getElementById("album1").value;
-    var theUrl = "http://localhost:3000/albumes/" + idUser;
+    var theUrl = "http://Practica1-508450024.us-east-2.elb.amazonaws.com/albumes/" + idUser;
     xmlhttp.open("POST", theUrl);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlhttp.onload  = function() {
@@ -127,7 +127,7 @@
     //Id del album a subir
     var idValor = select.value;
 
-    var theUrl = "http://localhost:3000/albumes/" + idValor;
+    var theUrl = "http://Practica1-508450024.us-east-2.elb.amazonaws.com/albumes/" + idValor;
     xmlhttp.open("DELETE", theUrl);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlhttp.onload  = function() {
@@ -154,7 +154,7 @@
   }
 
   function CargaSelect() {
-    var theUrl = "http://localhost:3000/albumes/" + idUser;
+    var theUrl = "http://Practica1-508450024.us-east-2.elb.amazonaws.com/albumes/" + idUser;
     xmlhttp.open("GET", theUrl);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlhttp.onload  = function() {

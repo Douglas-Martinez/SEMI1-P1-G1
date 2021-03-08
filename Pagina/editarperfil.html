@@ -104,7 +104,7 @@
   var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
   
   function CargaData() {
-    var theUrl = "http://localhost:3000/usuarios/" + idUser;
+    var theUrl = "http://Practica1-508450024.us-east-2.elb.amazonaws.com/usuarios/" + idUser;
     xmlhttp.open("GET", theUrl);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlhttp.onload  = function() {
@@ -155,7 +155,7 @@
 
     if(imagenName != "")nombreFoto = document.getElementById("user1").value;
 
-    var theUrl = "http://localhost:3000/usuarios/" + idUser;
+    var theUrl = "http://Practica1-508450024.us-east-2.elb.amazonaws.com/usuarios/" + idUser;
     xmlhttp.open("PUT", theUrl);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlhttp.onload  = function() {
