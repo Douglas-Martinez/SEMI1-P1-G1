@@ -73,6 +73,9 @@
 
             <hr class="my-4">
 
+            <div id="alert1">
+            </div>
+
             <button class="btn btn-primary" type="button" onclick="RegresarButton();">Regresar</button>
 
           </form>
@@ -115,8 +118,21 @@
 
       };
       xmlhttp.send(JSON.stringify({ "nombre": name, "imagen": imagenName}));
+
+      var div = document.getElementById('alert1');
+          div.innerHTML = '<div id="alerta1" class="alert alert-success alert-dismissible fade show" role="alert">'+
+          '<strong>Se subio la foto</strong>'+
+          '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'+
+          '</div>';
+          
     } else {
       console.log('No se ha seleccionado imagen, album o nombre de imagen');
+
+      var div = document.getElementById('alert1');
+          div.innerHTML = '<div id="alerta1" class="alert alert-danger alert-dismissible fade show" role="alert">'+
+          '<strong>Faltan datos</strong>'+
+          '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'+
+          '</div>';
     }
   }
 

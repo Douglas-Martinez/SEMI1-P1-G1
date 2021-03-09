@@ -75,12 +75,12 @@
 
               <div class="col-12">
                 <label for="firstName" class="form-label">Clave</label>
-                <input type="text" class="form-control" id="pass1" placeholder="" value="" required>
+                <input type="password" class="form-control" id="pass1" placeholder="" value="" required>
               </div>
 
               <div class="col-12">
                 <label for="firstName" class="form-label">Confirmar Clave</label>
-                <input type="text" class="form-control" id="pass2" placeholder="" value="" required>
+                <input type="password" class="form-control" id="pass2" placeholder="" value="" required>
               </div>
 
             </div>
@@ -91,6 +91,9 @@
           </form>
 
           <hr class="my-4">
+
+          <div id="alert1">
+          </div>
           
           <button class="btn btn-primary" type="button" onclick="RegresarButton();">Regresar</button>
         </div>
@@ -154,8 +157,20 @@
       };
       xmlhttp.send(JSON.stringify({ "username": user, "nombre": name, "password" : pass, "fperfil" : fperfil, "imagen": imagenName}));
 
+      var div = document.getElementById('alert1');
+          div.innerHTML = '<div id="alerta1" class="alert alert-success alert-dismissible fade show" role="alert">'+
+          '<strong>Se registro el usuario</strong>'+
+          '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'+
+          '</div>';
+
     } else {
       console.log("No coinciden las claves");
+      var div = document.getElementById('alert1');
+          div.innerHTML = '<div id="alerta1" class="alert alert-danger alert-dismissible fade show" role="alert">'+
+          '<strong>No coinciden las claves</strong>'+
+          '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'+
+          '</div>';
+
     }
   }
 

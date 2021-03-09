@@ -70,7 +70,7 @@
 
             <div class="col-12">
               <label for="pass1" class="form-label">Confirmar Clave</label>
-              <input type="text" class="form-control" id="pass1" placeholder="" value="" required>
+              <input type="password" class="form-control" id="pass1" placeholder="" value="" required>
             </div>
 
           </div>
@@ -80,6 +80,9 @@
           <button class="w-100 btn btn-primary btn-lg" type="button" onclick="EditarPerfil();">Editar</button>
         </form>
         <hr class="my-4">
+
+        <div id="alert1">
+        </div>
 
         <button class="btn btn-primary" type="button" onclick="RegresarButton();">Regresar</button>
       </div>
@@ -164,6 +167,12 @@
       if(jsonResponse.estado == "OK"){
         
         console.log("Se edito el usuario");
+
+        var div = document.getElementById('alert1');
+          div.innerHTML = '<div id="alerta1" class="alert alert-success alert-dismissible fade show" role="alert">'+
+          '<strong>Se edito el perfil</strong>'+
+          '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'+
+          '</div>';
 
       } else {
         console.log("No existe el usuario");
