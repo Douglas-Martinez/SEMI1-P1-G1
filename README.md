@@ -24,14 +24,14 @@ La página web fue desarrollada puramente con HTML, Javascript y CSS, y está al
 ## Usuarios IAM
 + S3: Usuarios utilizados para acceder únicamente a los recursos de S3 de AWS necesarios para realizar la práctica y así implementar una medida más de seguirdad en el uso de la nube pública.
   * Pagina Web:
-    - Nombre:
-    - Politicas:
+    - Nombre:s3_admin
+    - Politicas:AmazonS3FullAccess 
   * Bucket Imagenes:
     - Nombre: usr_s3
     - Politicas: AmazonS3FullAcces
 + EC2: Usuario con permisos para acceder y manejar únicamente las instanciass EC2 en AWS.
-  - Nombre:
-  - Politicas:
+  - Nombre:ec2_admin
+  - Politicas:AmazonEC2FullAccess | ElasticLoadBalancingFullAccess 
 + RDS: Usuario utilizado en la práctica para acceder y controlar únicamente los recursos de Amazon Relational Database Service (RDS).
   - Nombre: usr_rds
   - Politicas: AmazonRDSFullAcces
@@ -41,12 +41,16 @@ La página web fue desarrollada puramente con HTML, Javascript y CSS, y está al
 ## Capturas de Pantalla
 + Buckets S3
   * Página Web
+  ![s3pagina](https://user-images.githubusercontent.com/70494085/110404528-a1771700-8044-11eb-833d-b6d3621f11e6.PNG)
   * Contenedor de Imágenes
   ![s3bucketimagenes](https://user-images.githubusercontent.com/53403994/110375448-98238580-8017-11eb-999a-3438ad93aa1c.png)
   ![s3bucketimagenesfolders](https://user-images.githubusercontent.com/53403994/110375447-978aef00-8017-11eb-9031-73c91bc944ec.png)
 + EC2
   * Servidor Nodejs
+  ![ec2node](https://user-images.githubusercontent.com/70494085/110404888-4eea2a80-8045-11eb-8af5-315b039a33a1.PNG)
   * Servidor Python
+  ![ec2Python](https://user-images.githubusercontent.com/70494085/110404896-53164800-8045-11eb-8468-40eeb4a2e63e.PNG)
 + Instancia RDS
 ![rdsdatabasae](https://user-images.githubusercontent.com/53403994/110376183-8393bd00-8018-11eb-9d37-d228fd44376b.png)
 + Aplicación Web
+![paginaweb1](https://user-images.githubusercontent.com/70494085/110404987-7b9e4200-8045-11eb-8b3b-23f4001cf174.PNG)
