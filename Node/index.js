@@ -15,7 +15,9 @@ var conn = mysql.createPool(db_credentials);
 const AWS = require('aws-sdk');
 const aws_keys = require('./credentials/creds');
 const { Buffer } = require('buffer');
+const { type } = require('os');
 const s3 = new AWS.S3(aws_keys.s3);
+const rek = new AWS.Rekognition(aws_keys.rekognition);
 
 //Configuration
 const port = process.env.PORT || 3000;
@@ -43,19 +45,35 @@ app.use(
 );
 
 //Rutas - app.use('/', router);
-app.get('/', function (req, res) {
-    var inp = '1234alv';
-    res.send(`Salida: ${md5(inp)}`);
-});
-//RegistroGET para pruebas
-app.post('/', function (req, res) {
-    res.setHeader('Content-Type', 'application/json');
-    res.json({
-        estado: "mensaje",
-        mensaje: 'Error con datos de registro'
-    });
+app.get('/', async (req, res) => {
+    let sqlGet = `SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE id_usuario = 1;`;
+    conn.query(sqlGet, (err, result) =>{
+        if(err) {
+            console.log(err.message);
+            res.send('ERR con el usuario');
+        } else {
+            console.log(result[0].im_perfil);
+            
+            //S3
+            let imgName = 'Fotos_Perfil/' + result[0].im_perfil;
+            let params = {
+                Bucket: 'practica1-g1-imagenes',
+                Key: imgName
+            }
 
-    console.log(req.body);
+            s3.getObject(params, (err2, data)=> {
+                if(err2) {
+                    console.log(err2.message);
+                    res.send('ERR con la fperfil');
+                } else {
+                    let dBase64 = Buffer.from(data.Body).toString('base64');
+                    let buffEntrada = Buffer.from(im, 'base64');
+
+                    res.send(dBase64);
+                }
+            });
+        }
+    });    
 });
 
 //Registro
@@ -132,7 +150,7 @@ app.post("/usuarios", async (req, res) => {
     });
 });
 
-//Loggin y Perfil
+//Loggin y Perfil (NORMAL)
 app.post("/usuarios/login", async (req, res) => {
     let body = req.body;
     console.log(body);
@@ -158,10 +176,156 @@ app.post("/usuarios/login", async (req, res) => {
             } else {
                 console.log(result);
 
+                //GET TAGS
+                paramsTag = {
+                    Image: {
+                        S3Object: {
+                            Bucket: 'practica1-g1-imagenes',
+                            Name: 'Fotos_Perfil/' + result[0].im_perfil
+                        }
+                    },
+                    Attributes: ['ALL']
+                }
+                rek.detectFaces(paramsTag, (err4, dataTag)=> {
+                    if(err4){
+                        console.log(err4.message);
+                        //res.send('ERR con el rekognition');                                
+                        res.json({
+                            estado: "ERR",
+                            mensaje: 'Error con operacion de Rekognition (Tags)',
+                            content: er4.message
+                        });
+                    } else {
+                        console.log('========== Rekognition TAGS ==========');
+                        //console.log(dataTag.FaceDetails[0]);
+                
+                        result[0].tags = dataTag.FaceDetails[0];
+                        res.json({
+                            estado: "OK",
+                            mensaje: "Login, acceso permitido",
+                            content: result
+                        });
+                    }
+                });
+            }
+        }
+    });
+});
+
+//Login y Perfil (IMAGEN)
+app.post('/usuarios/loginFace', function (req, res) {
+    let imEntrada = req.body.entrada;
+
+    let sqlGet = `SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE username = '${req.body.username}';`;
+    conn.query(sqlGet, (err, resBD) =>{
+        if(err) {
+            console.log(err.message);
+            
+            res.json({
+                estado: "ERR",
+                mensaje: 'Error con datos de loggin (username)',
+                content: err.message
+            });
+        } else {
+            console.log('===== BD =====');
+            
+            if(resBD == '') {
                 res.json({
-                    estado: "OK",
-                    mensaje: "Login, acceso permitido",
-                    content: result
+                    estado: "ERR",
+                    mensaje: "El username y password no coinciden"
+                });
+            } else {
+                console.log(resBD);
+                //console.log(typeof resBD[0]);
+
+                //S3
+                let imgName = 'Fotos_Perfil/' + resBD[0].im_perfil;
+                let params = {
+                    Bucket: 'practica1-g1-imagenes',
+                    Key: imgName
+                }
+                s3.getObject(params, (err2, dataS3)=> {
+                    if(err2) {
+                        console.log(err2.message);
+                        
+                        res.json({
+                            estado: "ERR",
+                            mensaje: 'Error con la operacion de S3 (fotoPerfil)',
+                            content: err.message
+                        });
+                    } else {
+                        console.log('===== S3 =====');
+
+                        paramRek = {
+                            SourceImage: {
+                                S3Object: {
+                                    Bucket: params.Bucket,
+                                    Name: params.Key
+                                }
+                            },
+                            TargetImage: {
+                                Bytes: Buffer.from(imEntrada, 'base64')
+                            },
+                            SimilarityThreshold: '80'
+                        }
+                        rek.compareFaces(paramRek, (err3, dataRek) =>{
+                            if(err3) {
+                                console.log(err3.message);
+                                res.send('ERR con el rekognition');                                
+                                res.json({
+                                    estado: "ERR",
+                                    mensaje: 'Error con operacion de Rekognition (compareFaces)',
+                                    content: err.message
+                                });
+                            } else {
+                                console.log('===== Rekognition FACES =====');
+                                
+                                let similitud = dataRek.FaceMatches[0].Similarity;
+                                if(similitud < 80) {
+                                    console.log(`Similitud [${similitud}] < 80%`);
+
+                                    res.json({
+                                        estado: "ERR",
+                                        mensaje: "Las imagenes no coinciden"
+                                    });
+                                } else {
+                                    console.log(`Similitud [${similitud}] > 80%`);
+                                    
+                                    //GET TAGS
+                                    paramsTag = {
+                                        Image: {
+                                            S3Object: {
+                                                Bucket: '',
+                                                Name: ''
+                                            }
+                                        },
+                                        Attributes: ['ALL']
+                                    }
+                                    rek.detectFaces(paramsTag, (err4, dataTag)=> {
+                                        if(err4){
+                                            console.log(err4.message);
+                                            //res.send('ERR con el rekognition');                                
+                                            res.json({
+                                                estado: "ERR",
+                                                mensaje: 'Error con operacion de Rekognition (Tags)',
+                                                content: er4.message
+                                            });
+                                        } else {
+                                            console.log('========== Rekognition TAGS ==========');
+                                            //console.log(dataTag.FaceDetails[0]);
+                                    
+                                            resBD[0].tags = dataTag.FaceDetails[0];
+                                            res.json({
+                                                estado: "OK",
+                                                mensaje: "Login, acceso permitido",
+                                                content: resBD
+                                            });
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
                 });
             }
         }
