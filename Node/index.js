@@ -355,9 +355,35 @@ app.get("/usuarios/:id?", async (req, res) => {
             } else {
                 console.log(result);
                 
-                res.json({
-                    estado: "OK",
-                    content: result
+                //GET TAGS
+                paramsTag = {
+                    Image: {
+                        S3Object: {
+                            Bucket: 'practica1-g1-imagenes',
+                            Name: 'Fotos_Perfil/' + result[0].im_perfil
+                        }
+                    },
+                    Attributes: ['ALL']
+                }
+                rek.detectFaces(paramsTag, (err4, dataTag)=> {
+                    if(err4){
+                        console.log(err4.message);
+                        //res.send('ERR con el rekognition');                                
+                        res.json({
+                            estado: "ERR",
+                            mensaje: 'Error con operacion de Rekognition (Tags)',
+                            content: er4.message
+                        });
+                    } else {
+                        console.log('========== Rekognition TAGS ==========');
+                        //console.log(dataTag.FaceDetails[0]);
+                
+                        result[0].tags = dataTag.FaceDetails[0];
+                        res.json({
+                            estado: "OK",
+                            content: result
+                        });
+                    }
                 });
             }
         }
