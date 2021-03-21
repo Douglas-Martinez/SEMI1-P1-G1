@@ -44,38 +44,6 @@ app.use(
     })
 );
 
-//Rutas - app.use('/', router);
-app.get('/', async (req, res) => {
-    let sqlGet = `SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE id_usuario = 1;`;
-    conn.query(sqlGet, (err, result) =>{
-        if(err) {
-            console.log(err.message);
-            res.send('ERR con el usuario');
-        } else {
-            console.log(result[0].im_perfil);
-            
-            //S3
-            let imgName = 'Fotos_Perfil/' + result[0].im_perfil;
-            let params = {
-                Bucket: 'practica1-g1-imagenes',
-                Key: imgName
-            }
-
-            s3.getObject(params, (err2, data)=> {
-                if(err2) {
-                    console.log(err2.message);
-                    res.send('ERR con la fperfil');
-                } else {
-                    let dBase64 = Buffer.from(data.Body).toString('base64');
-                    let buffEntrada = Buffer.from(im, 'base64');
-
-                    res.send(dBase64);
-                }
-            });
-        }
-    });    
-});
-
 //Registro
 app.post("/usuarios", async (req, res) => {
     let body = req.body;
@@ -232,7 +200,7 @@ app.post('/usuarios/loginFace', function (req, res) {
             if(resBD == '') {
                 res.json({
                     estado: "ERR",
-                    mensaje: "El username y password no coinciden"
+                    mensaje: "El usuario no existe"
                 });
             } else {
                 console.log(resBD);
@@ -255,6 +223,8 @@ app.post('/usuarios/loginFace', function (req, res) {
                         });
                     } else {
                         console.log('===== S3 =====');
+                        var base64 = imEntrada;
+                        const base64Data = new Buffer.from(base64.replace(/^data:image\/\w+;base64,/, ""), 'base64');
 
                         paramRek = {
                             SourceImage: {
@@ -264,39 +234,33 @@ app.post('/usuarios/loginFace', function (req, res) {
                                 }
                             },
                             TargetImage: {
-                                Bytes: Buffer.from(imEntrada, 'base64')
+                                Bytes: Buffer.from(base64Data, 'base64')
                             },
                             SimilarityThreshold: '80'
                         }
                         rek.compareFaces(paramRek, (err3, dataRek) =>{
                             if(err3) {
                                 console.log(err3.message);
-                                res.send('ERR con el rekognition');                                
                                 res.json({
                                     estado: "ERR",
                                     mensaje: 'Error con operacion de Rekognition (compareFaces)',
-                                    content: err.message
+                                    content: err3.message
                                 });
                             } else {
                                 console.log('===== Rekognition FACES =====');
                                 
-                                let similitud = dataRek.FaceMatches[0].Similarity;
-                                if(similitud < 80) {
-                                    console.log(`Similitud [${similitud}] < 80%`);
-
+                                if((dataRek.FaceMatches == '') && (dataRek.UnmatchedFaces != '')) {
                                     res.json({
                                         estado: "ERR",
                                         mensaje: "Las imagenes no coinciden"
                                     });
-                                } else {
-                                    console.log(`Similitud [${similitud}] > 80%`);
-                                    
+                                } else if((dataRek.FaceMatches != '') && (dataRek.UnmatchedFaces == '')){
                                     //GET TAGS
                                     paramsTag = {
                                         Image: {
                                             S3Object: {
-                                                Bucket: '',
-                                                Name: ''
+                                                Bucket: 'practica1-g1-imagenes',
+                                                Name: imgName
                                             }
                                         },
                                         Attributes: ['ALL']
@@ -516,7 +480,6 @@ app.post('/albumes/:id?', async (req, res) => {
         }
     });
 });
-
 //Editar GET
 app.get('/albumes/:id?', async (req, res) => {
     let id = parseInt(req.params.id, 10);
@@ -548,44 +511,6 @@ app.get('/albumes/:id?', async (req, res) => {
                     content: result
                 });
             }
-        }
-    });
-});
-
-//Editar Album - Eliminar
-app.delete('/albumes/:id?', async (req, res) => {
-    let id = parseInt(req.params.id, 10);
-
-    let sql = `DELETE FROM album WHERE id_album = ${id};`;
-
-    conn.query(sql, (err, result) => {
-        if(err) {
-            console.log(err.message);
-
-            res.json({
-                estado: "ERR",
-                mensaje: 'Error con datos de la sentencia DELETE album',
-                content: err.message
-            });
-        } else {
-            //console.log(result);
-            if(result.affectedRows == 0) {
-                //No hay album con ese id
-                res.json({
-                    estado: "ERR",
-                    mensaje: "No existe Album con ese identificador",
-                    content: result
-                });
-            } else {
-                console.log(result);
-
-                res.json({
-                    estado: "OK",
-                    mensaje: "Album eliminado",
-                    content: result
-                });
-            }
-            
         }
     });
 });
