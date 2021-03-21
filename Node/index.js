@@ -18,6 +18,7 @@ const { Buffer } = require('buffer');
 const { type } = require('os');
 const s3 = new AWS.S3(aws_keys.s3);
 const rek = new AWS.Rekognition(aws_keys.rekognition);
+const translate = new AWS.Translate(aws_keys.translate);
 
 //Configuration
 const port = process.env.PORT || 3000;
@@ -43,6 +44,9 @@ app.use(
         extended: true
     })
 );
+
+//Prueba
+
 
 //Registro
 app.post("/usuarios", async (req, res) => {
@@ -181,7 +185,7 @@ app.post("/usuarios/login", async (req, res) => {
 });
 
 //Login y Perfil (IMAGEN)
-app.post('/usuarios/loginFace', function (req, res) {
+app.post('/usuarios/loginFace', async (req, res) => {
     let imEntrada = req.body.entrada;
 
     let sqlGet = `SELECT id_usuario, username, nombre, im_perfil FROM usuario WHERE username = '${req.body.username}';`;
@@ -599,7 +603,7 @@ app.get('/fotos/:id?', async (req, res) => {
     let contenido = {};
     
     let sqlperfil = `SELECT id_fperfil, nombre_imagen FROM foto_perfil WHERE id_usuario = ${id};`;
-    let sql = `SELECT F.id_foto, F.nombre_foto, A.id_album, A.nombre_album
+    let sql = `SELECT F.id_foto, F.nombre_foto, F.descripcion, A.id_album, A.nombre_album
             FROM foto F, album A, usuario U
             WHERE F.id_album = A.id_album
             AND A.id_usuario = U.id_usuario
@@ -650,6 +654,37 @@ app.get('/fotos/:id?', async (req, res) => {
                         content: contenido
                     });
                 }
+            });
+        }
+    });
+});
+
+//Traducir un texto con el idioma especificado
+//          (debe estar en el codigo respectivo)
+app.post('/traducir', async (req, res) => {
+    
+    let params = {
+        Text: req.body.text || 'Hello there',
+        SourceLanguageCode: 'auto',
+        TargetLanguageCode: req.body.idioma || 'no'
+    };
+
+    translate.translateText(params, function (err, data) {
+        if (err) {
+            console.log(err.message);
+
+            res.json({
+                estado: "ERR",
+                mensaje: 'Error con la traduccion',
+                content: err.message
+            });
+        } else {
+            console.log(data);
+
+            res.json({
+                estado: "OK",
+                mensaje: "Traduccion realizada",
+                content: data
             });
         }
     });
