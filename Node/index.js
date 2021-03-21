@@ -452,6 +452,26 @@ app.put('/usuarios/:id?', async (req, res) => {
     });
 });
 
+//Detectar Texto;
+app.post('/usuarios/detectText', async (req, res) => {
+    var base64 = req.body.imagen;
+    const base64Data = new Buffer.from(base64.replace(/^data:image\/\w+;base64,/, ""), 'base64');
+    
+    var params = {
+        Image: {
+            Bytes: Buffer.from(base64Data, 'base64')
+        }
+    };
+    rek.detectText(params, (err,data) => {
+        if(err) {
+            console.log(err);
+            res.send('Error');
+        } else {
+            res.json(data.TextDetections);
+        }
+    });
+});
+
 //Editar Album - Crear
 app.post('/albumes/:id?', async (req, res) => {
     let id = parseInt(req.params.id, 10);
