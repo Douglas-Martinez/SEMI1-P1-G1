@@ -16,6 +16,7 @@ const AWS = require('aws-sdk');
 const aws_keys = require('./credentials/creds');
 const { Buffer } = require('buffer');
 const { type } = require('os');
+const { exists } = require('fs');
 const s3 = new AWS.S3(aws_keys.s3);
 const rek = new AWS.Rekognition(aws_keys.rekognition);
 const translate = new AWS.Translate(aws_keys.translate);
@@ -592,6 +593,185 @@ app.post("/fotos/:id?", async (req, res) => {
                 id: result.insertId,
                 content: result
             });
+        }
+    });
+});
+//Subir foto fase 2
+app.post('/fotosv2/:id?', async (req, res) => { //El id del url (/fotosv2/:id?) es el idUsuario
+    let idUsuario = parseInt(req.params.id, 10);
+    let body = req.body;
+    
+    if(!idUsuario) {
+        console.log('Id NULL');
+        res.send({
+            estado: "ERR",
+            mensaje: 'Error. IdUsuario requerido'
+        });
+        return;
+    }
+    if(!body.nombre || !body.imagen || !body.descripcion) {
+        console.log('Faltan datos');
+        res.send({
+            estado: "ERR",
+            mensaje: 'Error. Falta nombre, descripcion y/o imagen'
+        });
+        return;
+    }
+    console.log('Datos Correctos');
+    
+    var base64 = body.imagen;
+    const base64Data = new Buffer.from(base64.replace(/^data:image\/\w+;base64,/, ""), 'base64');
+
+    //GET LABELS
+    let paramsLabels = {
+        Image: {
+            Bytes: Buffer.from(base64Data, 'base64')
+        },
+        MaxLabels: 5
+    }
+    rek.detectLabels(paramsLabels, async (err, data) => {
+        if(err) {
+            console.log(err.message);
+
+            res.json({
+                estado: "ERR",
+                mensaje: 'Error al detectar tags de la imagen: "' + nombreimagen + '"',
+                content: err.message
+            });
+        } else {
+            if(data.Labels == "") {
+                res.json({
+                    estado: "ERR",
+                    mensaje: 'No se detectaron tags'
+                });
+            } else {
+                console.log('===== FOTO =====');
+                let nombreimagen = body.nombre;
+                if(body.imagen != ""){
+                    const aux = body.imagen;
+                    const tipo = aux.split(';')[0].split('/')[1];
+
+                    nombreimagen = nombreimagen + '_' + uuid.v4() + '.' + tipo;
+                }
+
+                //INSERTAR IMAGEN BD
+                let idFotov2;
+                let qInsertFoto2 = `INSERT INTO fotov2 (nombre_foto, descripcion) VALUES ('${nombreimagen}','${body.descripcion}');`;
+                conn.query(qInsertFoto2, (errF2, resultF2) => {
+                    if(errF2) {
+                        console.log(errF2.message);
+                        
+                        res.json({
+                            estado: "ERR",
+                            mensaje: 'Error al insertar la foto en la BD',
+                            content: err.message
+                        });
+                    } else {
+                        console.log('FOTO INSERTADA EN BD');
+                        console.log(resultF2.insertId);
+                        idFotov2 = resultF2.insertId;
+
+                        //INSERTAR IMAGEN S3
+                        const type = base64.split(';')[0].split('/')[1];
+                        const params = {
+                            Bucket: 'practica1-g1-imagenes',
+                            Key: `Fotos_Publicadas/${nombreimagen}`, // type is not required
+                            Body: base64Data,
+                            ACL: 'public-read',
+                            ContentEncoding: 'base64', // required
+                            ContentType: `image/${type}` // required. Notice the back ticks
+                        }
+                        s3.upload(params, (errS3, dataS3) => {
+                            if (errS3) {
+                                console.log(errS3.message);
+                                res.json({
+                                    estado: "ERR",
+                                    mensaje: 'ERROR al cargar la foto a S3'
+                                });
+                                return;
+                            }
+                            console.log(`FOTO INSERTADA SATISFACTORIAMENTE EN S3.\n ${dataS3.Location}`)
+                        });
+
+                        //VERIFICAR ALBUMES
+                        console.log('===== ALBUMES =====');
+                        let tags = []
+                        for (const lab of data.Labels) {
+                            tags.push(lab.Name);
+
+                            let verAlbum = `SELECT id_album FROM album WHERE id_usuario = ${idUsuario} AND nombre_album = '${lab.Name}';`;
+                            conn.query(verAlbum, (err1, result) => {
+                                if(err1) {
+                                    console.log(err1);
+                                    
+                                    res.json({
+                                        estado: "ERR",
+                                        mensaje: 'Error al obtener el album ' + lab.Name,
+                                        content: err1.message
+                                    });
+                                } else {
+                                    if(result == '') {
+                                        //INSERTAR ALBUM
+                                        let insertAlbum = `INSERT INTO album (nombre_album, id_usuario) VALUES ('${lab.Name}',${idUsuario});`;
+                                        conn.query(insertAlbum, (errAlbum, resultAlbum) => {
+                                            if(errAlbum) {
+                                                console.log(errAlbum.message);
+
+                                                res.json({
+                                                    estado: "ERR",
+                                                    mensaje: 'Error al insertar el album ' + lab.Name,
+                                                    content: err1.message
+                                                });
+                                            } else {
+                                                console.log("SE INSERTO EL ALBUM CON TAG: " + lab.Name);
+                                                console.log("ID: " + resultAlbum.insertId);
+                                                
+                                                // ASIGNAR EN DETALLE
+                                                console.log("ALBUM" + resultAlbum.insertId);
+                                                console.log("FOTO: " + idFotov2);
+                                                let qDetalle = `INSERT INTO album_foto (id_album, id_foto) VALUES (${resultAlbum.insertId},${idFotov2});`;
+                                                conn.query(qDetalle, (errD, resD) => {
+                                                    if(errD) {
+                                                        console.log(errD.message);
+
+                                                        res.json({
+                                                            estado: "ERR",
+                                                            mensaje: 'Error1 al asignar foto al detalle del album',
+                                                            content: errD.message
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    } else {
+                                        idAlbum = result[0].id_album;
+                                        
+                                        // ASIGNAR EN DETALLE
+                                        let qDetalle = `INSERT INTO album_foto (id_album, id_foto) VALUES (${idAlbum},${idFotov2});`;
+                                        conn.query(qDetalle, (errD, resD) => {
+                                            if(errD) {
+                                                console.log(errD.message);
+
+                                                res.json({
+                                                    estado: "ERR",
+                                                    mensaje: 'Error2 al asignar foto al detalle del album',
+                                                    content: errD.message
+                                                });
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                        res.json({
+                            estado: "OK",
+                            mensaje: "Fotografia cargada",
+                            id: idFotov2,
+                            content: resultF2
+                        });
+                    }
+                });
+            }
         }
     });
 });
