@@ -727,8 +727,6 @@ app.post('/fotosv2/:id?', async (req, res) => { //El id del url (/fotosv2/:id?) 
                                                 console.log("ID: " + resultAlbum.insertId);
                                                 
                                                 // ASIGNAR EN DETALLE
-                                                console.log("ALBUM" + resultAlbum.insertId);
-                                                console.log("FOTO: " + idFotov2);
                                                 let qDetalle = `INSERT INTO album_foto (id_album, id_foto) VALUES (${resultAlbum.insertId},${idFotov2});`;
                                                 conn.query(qDetalle, (errD, resD) => {
                                                     if(errD) {
@@ -745,6 +743,7 @@ app.post('/fotosv2/:id?', async (req, res) => { //El id del url (/fotosv2/:id?) 
                                         });
                                     } else {
                                         idAlbum = result[0].id_album;
+                                        console.log('SE AGREGARA UNA FOTO AL ALBUM CON TAG: ' + lab.Name);
                                         
                                         // ASIGNAR EN DETALLE
                                         let qDetalle = `INSERT INTO album_foto (id_album, id_foto) VALUES (${idAlbum},${idFotov2});`;
@@ -822,6 +821,65 @@ app.get('/fotos/:id?', async (req, res) => {
                 } else {
                     //console.log(r);
                     
+                    if(r == '') {
+                        contenido.perfil = []
+                    } else {
+                        console.log(r);
+                        contenido.perfil = r;
+                    }
+                    
+                    res.json({
+                        estado: "OK",
+                        content: contenido
+                    });
+                }
+            });
+        }
+    });
+});
+//Ver todas las fotos fase 2
+app.get('/fotosv2/:id?', async (req, res) => {
+    let idUsuario = parseInt(req.params.id, 10);
+
+    let contenido = {};
+    
+    let sqlperfil = `SELECT id_fperfil, nombre_imagen FROM foto_perfil WHERE id_usuario = ${idUsuario};`;
+    let sql = `SELECT F.id_foto, F.nombre_foto, F.descripcion, A.id_album, A.nombre_album
+            FROM fotov2 F, album A, album_foto FA, usuario U
+            WHERE F.id_foto = FA.id_foto
+            AND FA.id_album = A.id_album
+            AND A.id_usuario = U.id_usuario
+            AND U.id_usuario = ${idUsuario}
+            ORDER BY A.id_album
+           ;`;
+
+    conn.query(sql, (err, result) => {
+        if(err) {
+            console.log(err.message);
+
+            res.json({
+                estado: "ERR",
+                mensaje: 'Error al obtener imagenes',
+                content: err.message
+            });
+        } else {
+            if(result == '') {
+                contenido.fotos = []
+            } else {
+                console.log(result);
+                contenido.fotos = result;
+            }
+
+            conn.query(sqlperfil, (e,r) => {
+                if(e) {
+                    console.log(e.message);
+
+                    res.json({
+                        estado: "ERR",
+                        mensaje: 'Error al obtener fotos de perfil',
+                        content: e.message
+                    });
+                } else {
                     if(r == '') {
                         contenido.perfil = []
                     } else {
