@@ -477,69 +477,6 @@ app.post('/usuarios/detectText', async (req, res) => {
     });
 });
 
-//Editar Album - Crear
-app.post('/albumes/:id?', async (req, res) => {
-    let id = parseInt(req.params.id, 10);
-    let body = req.body;
-
-    let sql = `INSERT INTO album (nombre_album, id_usuario) VALUES ('${body.nombre}', ${id});`;
-
-    conn.query(sql, (err, result) => {
-        if(err) {
-            console.log(err.message);
-
-            res.json({
-                estado: "ERR",
-                mensaje: 'Error con datos de creacion de album',
-                content: err.message
-            });
-        } else {
-            console.log(result);
-    
-            res.json({
-                estado: "OK",
-                mensaje: "Album creado",
-                id: result.insertId,
-                content: result
-            });
-        }
-    });
-});
-//Editar GET
-app.get('/albumes/:id?', async (req, res) => {
-    let id = parseInt(req.params.id, 10);
-
-    let sql = `SELECT id_album, nombre_album FROM album WHERE id_usuario = ${id};`;
-
-    conn.query(sql, (err, result) => {
-        if(err) {
-            console.log(err.message);
-
-            res.json({
-                estado: "ERR",
-                mensaje: 'Error con datos de album (id_usuario)',
-                content: err.message
-            });
-        } else {
-            //console.log(result);
-            if(result == '') {
-                res.json({
-                    estado: "OK",
-                    mensaje: "No hay albumes por el momento",
-                    content: result
-                });
-            } else {
-                console.log(result);
-
-                res.json({
-                    estado: "OK",
-                    content: result
-                });
-            }
-        }
-    });
-});
-
 // Subir fotos
 app.post("/fotos/:id?", async (req, res) => {
     let id = parseInt(req.params.id, 10);
