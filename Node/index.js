@@ -469,10 +469,18 @@ app.post('/usuarios/detectText', async (req, res) => {
     };
     rek.detectText(params, (err,data) => {
         if(err) {
-            console.log(err);
-            res.send('Error');
+            console.log(err.message);
+
+            res.json({
+                estado: "ERR",
+                mensaje: 'Error con identificar texto de imagen',
+                content: err.message
+            });
         } else {
-            res.json(data.TextDetections);
+            res.json({
+                estado: "OK",
+                content: data.TextDetections
+            });
         }
     });
 });
