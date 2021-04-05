@@ -35,6 +35,9 @@ La página web fue desarrollada puramente con HTML, Javascript y CSS, y está al
 + RDS: Usuario utilizado en la práctica para acceder y controlar únicamente los recursos de Amazon Relational Database Service (RDS).
   - Nombre: usr_rds
   - Politicas: AmazonRDSFullAcces
++ LEX: Usuario utilizado para conectarse con el bot de Amazon Lex y obtener sus respuestas.
+  - Nombre: bot
+  - Politicas: AmazonLexRunBotsOnly
 
 ---
 
