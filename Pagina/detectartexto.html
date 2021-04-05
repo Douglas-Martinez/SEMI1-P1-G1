@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Subir Foto</title>
+  <title>Detectar Texto</title>
 
   <!-- CSS only -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -39,7 +39,7 @@
   <div class="container">
     <main>
       <div class="py-5">
-        <h2>Subir Foto</h2>
+        <h2>Detectar Texto</h2>
       </div>
 
       <div class="row g-3">
@@ -59,13 +59,11 @@
               </div>
               <button class="btn btn-primary" type="button" onclick="chooseFile();">Cargar Foto</button>
               <div class="col-12">
-                <label for="name1" class="form-label">Nombre de Foto</label>
-                <input type="text" class="form-control" id="name1" placeholder="" value="" required>
-                <label for="des1" class="form-label">Descripcion de Foto</label>
-                <textarea  type="text" class="form-control" id="des1" placeholder="" value="" required rows="3"></textarea>
+                <label for="des1" class="form-label">Texto Encontrado en la Imagen:</label>
+                <textarea disabled type="text" class="form-control" id="des1" placeholder="" value="" required rows="3"></textarea>
               </div>
 
-              <button onclick="SubirButton();" class="btn btn-primary" type="button">Subir</button>
+              <button onclick="SubirButton();" class="btn btn-primary" type="button">Detectar</button>
 
             </div>
 
@@ -100,24 +98,33 @@
 
   function SubirButton(){
     
-      var name = document.getElementById("name1").value; 
-      var descri = document.getElementById("des1").value; 
+      
 
-    if(imagenName != "" && name != "") {
-      var theUrl = "http://localhost:3000/fotosv2/" + idUser;
+    if(imagenName != "") {
+      var theUrl = "http://localhost:3000/usuarios/detectText";
       xmlhttp.open("POST", theUrl);
       xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
       xmlhttp.onload  = function() {
         var jsonResponse = JSON.parse(xmlhttp.responseText);
-        // do something with jsonResponse
-        console.log(jsonResponse)
+        var textoResultado = "";
+
+        for (let index = 0; index < jsonResponse.content.length; index++) {
+            const element = jsonResponse.content[index];
+            
+            if(element.Type == "WORD"){
+                textoResultado = textoResultado + element.DetectedText + " ";
+            }
+        }
+
+
+        document.getElementById("des1").value = textoResultado;
 
       };
-      xmlhttp.send(JSON.stringify({ "nombre": name, "descripcion": descri, "imagen": imagenName}));
+      xmlhttp.send(JSON.stringify({ "imagen": imagenName}));
 
       var div = document.getElementById('alert1');
           div.innerHTML = '<div id="alerta1" class="alert alert-success alert-dismissible fade show" role="alert">'+
-          '<strong>Se subio la foto</strong>'+
+          '<strong>Se esta detectando el texto.</strong>'+
           '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'+
           '</div>';
           
@@ -126,7 +133,7 @@
 
       var div = document.getElementById('alert1');
           div.innerHTML = '<div id="alerta1" class="alert alert-danger alert-dismissible fade show" role="alert">'+
-          '<strong>Faltan datos</strong>'+
+          '<strong>No fue posible detectar texto, revise la informacion requerida.</strong>'+
           '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'+
           '</div>';
     }

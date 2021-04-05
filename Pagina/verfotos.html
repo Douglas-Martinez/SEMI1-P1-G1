@@ -13,6 +13,11 @@
         integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
         crossorigin="anonymous"></script>
 
+    <script
+        src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+        crossorigin="anonymous"></script>
+
     <style>
         .bd-placeholder-img {
             font-size: 1.125rem;
@@ -52,6 +57,11 @@
                 <h2>Albumes</h2>
             </div>
 
+            <div class="modales">
+
+
+            </div>
+
             <div class="row g-3">
                 <div class="col-md-3 col-lg-3 ">
 
@@ -64,7 +74,6 @@
 
                         <div class="d-grid gap-2">
                             <button class="btn btn-primary" type="button" onclick="SubirFotoButton();">Subir Foto</button>
-                            <button class="btn btn-primary" type="button" onclick="EditarAlbumButton();">Editar Albumes</button>
                             <button class="btn btn-primary" type="button" onclick="RegresarButton();">Regresar</button>
                         </div>
                     </form>
@@ -78,6 +87,8 @@
                     </div>
 
                 </div>
+
+                
         </main>
 
         <footer class="my-5 pt-5 text-muted text-center text-small">
@@ -95,13 +106,15 @@
     var url = new URL(url_string);
     var idUser = url.searchParams.get("id");
     var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
-    var theUrl = "http://Practica1-508450024.us-east-2.elb.amazonaws.com/fotos/" + idUser;
+    var theUrl = "http://localhost:3000/fotosv2/" + idUser;
 
     xmlhttp.open("GET", theUrl);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlhttp.onload  = function() {
     var jsonResponse = JSON.parse(xmlhttp.responseText);
     // do something with jsonResponse
+
+    console.log(jsonResponse)
     if(jsonResponse.estado == "OK"){
 
         var result = jsonResponse.content.fotos.reduce(function (r, a) {
@@ -123,19 +136,45 @@
 
         for (let index = 0; index < jsonResponse.content.perfil.length; index++) {
             
+            
             const element = jsonResponse.content.perfil[index];
+            
+            
             var a = document.createElement("a");
             a.className = "col-lg-3 col-md-4 col-6 my-3";
-            a.setAttribute('href', "https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Perfil/" + element.nombre_imagen);
+            a.setAttribute('type', "button");
             a.setAttribute('data-toggle', "lightbox");
             a.setAttribute('data-gallery', "example-gallery");
+            a.setAttribute('data-bs-toggle', "modal");
+            a.setAttribute('data-bs-target', "#Modal" + element.id_fperfil);
+
 
             var img = document.createElement("img");
             img.className = "img-fluid card";
             img.setAttribute('src', "https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Perfil/" + element.nombre_imagen);
+            img.setAttribute('data-toggle', "modal");
+            img.setAttribute('data-target', "#Modal" + element.id_fperfil);
 
             a.appendChild(img);
             div.appendChild(a);
+
+            var large = '<div class="modal fade" id="Modal' + element.id_fperfil + '" tabindex="-1">'+
+                '<div class="modal-dialog">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                    '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                    '<img class="img-fluid z-depth-1" src="https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Perfil/' + element.nombre_imagen +'" alt="video">'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                    '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>'+
+                    '</div>'+
+                '</div>'+
+                '</div>'+
+            '</div>';
+
+            $('.modales').append(large);
 
             var img2 = document.getElementById("fotoPer");
             img2.className = "img-thumbnail";
@@ -159,18 +198,49 @@
 
             for (let index = 0; index < value.length; index++) {
                 const element = value[index];
+
+
                 var a = document.createElement("a");
                 a.className = "col-lg-3 col-md-4 col-6 my-3";
-                a.setAttribute('href', "https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Publicadas/" + element.nombre_foto);
+                a.setAttribute('type', "button");
                 a.setAttribute('data-toggle', "lightbox");
                 a.setAttribute('data-gallery', "example-gallery");
+                a.setAttribute('data-bs-toggle', "modal");
+                a.setAttribute('data-bs-target', "#Modal" + element.id_foto);
 
                 var img = document.createElement("img");
                 img.className = "img-fluid card";
                 img.setAttribute('src', "https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Publicadas/" + element.nombre_foto);
+                img.setAttribute('data-toggle', "modal");
+                img.setAttribute('data-target', "#Modal" + element.id_foto);
 
                 a.appendChild(img);
                 div.appendChild(a);
+
+                var large = '<div class="modal fade" id="Modal' + element.id_foto + '" tabindex="-1">'+
+                '<div class="modal-dialog">'+
+                    '<div class="modal-content">'+
+                        '<div class="modal-header">'+
+                        '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>'+
+                        '</div>'+
+                        '<div class="modal-body">'+
+                        '<img class="img-fluid z-depth-1" src="https://practica1-g1-imagenes.s3.us-east-2.amazonaws.com/Fotos_Publicadas/' + element.nombre_foto +'" alt="video">'+
+                        '<h3 class="photoDes">' + element.descripcion + '</h3>' +
+                        '<select class="form-select" aria-label="Default select example">'+
+                        '<option selected value="en">Ingles</option>'+
+                        '<option value="de">Aleman</option>'+
+                        '<option value="it">Italiano</option>'+
+                        '</select>'+
+                        '</div>'+
+                        '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>'+
+                        '<button type="button" class="btn btn-primary btnSaveChanges">Traducir</button>'+
+                        '</div>'+
+                        '</div>'+
+                    '</div>'+
+                '</div>';
+
+                $('.modales').append(large);
                 
             }
             
@@ -200,5 +270,22 @@
         document.location='inicio.html?id='+ idUser;
     }
 
+    $("body").on("click", ".btnSaveChanges", function(){
+        var parent = $(this).parent().parent();
+        var texto = parent.find('.modal-body')[0].children[1].textContent;
+
+        var theUrl = "http://localhost:3000/traducir";
+        xmlhttp.open("POST", theUrl);
+        xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xmlhttp.onload  = function() {
+            var jsonResponse = JSON.parse(xmlhttp.responseText);
+            // do something with jsonResponse
+
+            parent.find('.modal-body')[0].children[1].textContent =  jsonResponse.content.TranslatedText
+
+        };
+        xmlhttp.send(JSON.stringify({ "text": texto, "idioma": parent.find('.modal-body')[0].children[2].value}));
+
+    });
 
 </script>

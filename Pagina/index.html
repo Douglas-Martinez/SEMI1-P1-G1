@@ -49,7 +49,7 @@
       <hr />
       <div id="alert1">
       </div>
-
+      <button type="button" class="w-100 btn btn-lg btn-primary" style="margin-bottom: 5px;" onclick="WebCamButton();">Inicio Camara</button>
       <button type="button" class="w-100 btn btn-lg btn-primary" onclick="RegistroButton();">Registrarse</button>
       <p class="mt-5 mb-3 text-muted">&copy; 2021</p>
     </form>
@@ -63,17 +63,11 @@
 <script>
   var imagenName = "";
   var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
-  var theUrl = "http://Practica1-508450024.us-east-2.elb.amazonaws.com/usuarios/login";
+  var theUrl = "http://localhost:3000/usuarios/login";
 
   function LoginButton() {          
     var user = document.getElementById("user1").value; 
     var pass = document.getElementById("pass1").value;
-    
-      var text = '{ "username":"'+ user +'" , '+
-                  '"password":"'+ pass +'" }';    
-      
-      var obj = JSON.parse(text); 
-      console.log(obj);
 
       xmlhttp.open("POST", theUrl);
       xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -102,6 +96,10 @@
 
   function RegistroButton(){
     document.location = 'registro.html';
+  }
+
+  function WebCamButton(){
+    document.location = 'webcam.html';
   }
 
 </script>

@@ -49,6 +49,10 @@
             <div class="col-12">
               <img id="fotoPerfil" src="resources/no-photo.jpg" alt="..." class="img-thumbnail">
             </div>
+
+            <div id = "tags">
+            </div>
+
           </form>
         </div>
         <div class="col-md-5 col-lg-5">
@@ -76,7 +80,8 @@
             <button class="btn btn-primary" type="button" onclick="SubirFotoButton();">Subir Foto</button>
             <button class="btn btn-primary" type="button" onclick="VerFotosButton();">Ver Fotos</button>
             <button class="btn btn-primary" type="button" onclick="EditarPerfilButton();">Editar Perfil</button>
-            <button class="btn btn-primary" type="button" onclick="EditarAlbumButton();">Editar Albumes</button>
+            <button class="btn btn-primary" type="button" onclick="ChatButton();">ChatBot</button>
+            <button class="btn btn-primary" type="button" onclick="DetectarButton();">Detectar Texto</button>
             <button class="btn btn-primary" type="button" onclick="CerrarButton();">Cerrar Sesion</button>
           </div>
         </div>
@@ -99,7 +104,7 @@ var url_string = window.location.href; //window.location.href
 var url = new URL(url_string);
 var idUser = url.searchParams.get("id");
 var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
-var theUrl = "http://Practica1-508450024.us-east-2.elb.amazonaws.com/usuarios/" + idUser;
+var theUrl = "http://localhost:3000/usuarios/" + idUser;
 
 xmlhttp.open("GET", theUrl);
 xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -108,9 +113,65 @@ xmlhttp.onload  = function() {
   // do something with jsonResponse
   if(jsonResponse.estado == "OK"){
     
-    console.log(jsonResponse.content[0]);
     document.getElementById("user1").value = jsonResponse.content[0].username; 
     document.getElementById("name1").value = jsonResponse.content[0].nombre; 
+    
+    console.log(jsonResponse.content[0].tags);
+    var tarjetas = document.getElementById("tags");
+    var span = document.createElement("span");
+    span.className = "badge bg-primary";
+    span.textContent = "Edad: " + jsonResponse.content[0].tags.AgeRange.Low + "-" + jsonResponse.content[0].tags.AgeRange.High;
+    tarjetas.appendChild(span);
+
+    if(jsonResponse.content[0].tags.Beard.Value == true){
+      span = document.createElement("span");
+      span.className = "badge bg-primary";
+      span.textContent = "Barba";
+      tarjetas.appendChild(span);
+    }
+
+    for (let index = 0; index < jsonResponse.content[0].tags.Emotions.length; index++) {
+      const element = jsonResponse.content[0].tags.Emotions[index];
+      if(element.Confidence > 85){
+        span = document.createElement("span");
+        span.className = "badge bg-primary";
+        span.textContent = element.Type;
+        tarjetas.appendChild(span);
+      }
+    }
+
+    if(jsonResponse.content[0].tags.Eyeglasses.Value == true){
+      span = document.createElement("span");
+      span.className = "badge bg-primary";
+      span.textContent = "Lentes";
+      tarjetas.appendChild(span);
+    }
+
+    if(jsonResponse.content[0].tags.Sunglasses.Value == true){
+      span = document.createElement("span");
+      span.className = "badge bg-primary";
+      span.textContent = "Lentes de Sol";
+      tarjetas.appendChild(span);
+    }
+
+    if(jsonResponse.content[0].tags.Smile.Value == true){
+      span = document.createElement("span");
+      span.className = "badge bg-primary";
+      span.textContent = "Sonriendo";
+      tarjetas.appendChild(span);
+    }
+
+    if(jsonResponse.content[0].tags.Mustache.Value == true){
+      span = document.createElement("span");
+      span.className = "badge bg-primary";
+      span.textContent = "Bigote";
+      tarjetas.appendChild(span);
+    }
+
+    span = document.createElement("span");
+    span.className = "badge bg-primary";
+    span.textContent = jsonResponse.content[0].tags.Gender.Value;
+    tarjetas.appendChild(span);
 
     if(jsonResponse.content[0].im_perfil != "default") {
       var img2 = document.getElementById("fotoPerfil");
@@ -132,8 +193,8 @@ function SubirFotoButton(){
   document.location='subirfoto.html?id='+ idUser;
 }
 
-function EditarAlbumButton(){
-  document.location='editaralbum.html?id='+ idUser;
+function DetectarButton(){
+  document.location='detectartexto.html?id='+ idUser;
 }
 
 function EditarPerfilButton(){
@@ -142,6 +203,10 @@ function EditarPerfilButton(){
 
 function CerrarButton(){
   document.location = 'index.html';
+}
+
+function ChatButton(){
+  document.location = 'chatbot.html';
 }
 
 

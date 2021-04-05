@@ -107,7 +107,7 @@
   var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
   
   function CargaData() {
-    var theUrl = "http://Practica1-508450024.us-east-2.elb.amazonaws.com/usuarios/" + idUser;
+    var theUrl = "http://localhost:3000/usuarios/" + idUser;
     xmlhttp.open("GET", theUrl);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlhttp.onload  = function() {
@@ -158,7 +158,7 @@
 
     if(imagenName != "")nombreFoto = document.getElementById("user1").value;
 
-    var theUrl = "http://Practica1-508450024.us-east-2.elb.amazonaws.com/usuarios/" + idUser;
+    var theUrl = "http://localhost:3000/usuarios/" + idUser;
     xmlhttp.open("PUT", theUrl);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlhttp.onload  = function() {
@@ -176,6 +176,7 @@
 
       } else {
         console.log("No existe el usuario");
+        
       }
     };
     xmlhttp.send(JSON.stringify({ "username": document.getElementById("user1").value, "nombre": document.getElementById("name1").value, "password" : document.getElementById("pass1").value, "fperfil" : nombreFoto, "imagen": imagenName}));
