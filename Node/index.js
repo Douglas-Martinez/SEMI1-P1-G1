@@ -46,7 +46,37 @@ app.use(
     })
 );
 
-//Prueba
+/*
+**
+**
+=============== TAREA LAMBDA-APIGATEWAY ===============
+**
+**
+*/
+app.post("/rekognition", async(req, res) => {
+    let body = req.body;
+    
+    params = {
+        SourceImage: {
+            Bytes: Buffer.from(body.imagen1, 'base64')
+        },
+        TargetImage: {
+            Bytes: Buffer.from(body.imagen2, 'base64')
+        },
+        SimilarityThreshold: body.similitud
+    }
+    rek.compareFaces(params, (err, data) => {
+        if(err) {
+            console.log(err.message);
+            res.json({
+                error: err.message
+            })
+        } else {
+            res.json(data)
+        }
+    });
+});
+
 
 
 //Registro
